@@ -3,12 +3,12 @@
  * Utilities for transforming between Airflow API responses and application types
  */
 
-import {
+import type {
   AirflowDAGResponse,
   AirflowDAGRunResponse,
   AirflowTaskInstanceResponse,
 } from '../types/airflow';
-import {
+import type {
   DAG,
   DAGRun,
   TaskInstance,

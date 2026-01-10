@@ -3,7 +3,10 @@
  * Defines types for API requests and utility functions
  */
 
-import { DAGFilters, DAGRunFilters, TaskInstanceFilters, PaginationParams } from './app';
+import type { PaginationParams } from './app';
+
+// Re-export commonly used types from app for convenience
+export type { DAGFilters, DAGRunFilters, TaskInstanceFilters } from './app';
 
 // API Client configuration
 export interface APIClientConfig {

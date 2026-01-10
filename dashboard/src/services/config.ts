@@ -3,7 +3,7 @@
  * Centralized configuration for API client and services
  */
 
-import { APIClientConfig } from '../types/api';
+import type { APIClientConfig } from '../types/api';
 
 /**
  * Environment configuration interface

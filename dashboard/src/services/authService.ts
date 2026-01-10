@@ -4,8 +4,7 @@
  */
 
 import { airflowApiClient } from './airflowApiClient';
-import { AuthToken, User } from '../types/app';
-import { LoginRequest, RefreshTokenRequest } from '../types/api';
+import type { AuthToken, User } from '../types/app';
 
 /**
  * Token storage keys
@@ -21,7 +20,7 @@ const USER_STORAGE_KEY = 'airflow_user';
 export class AuthService {
   private currentToken: AuthToken | null = null;
   private currentUser: User | null = null;
-  private refreshTimer: NodeJS.Timeout | null = null;
+  private refreshTimer: number | null = null;
 
   constructor() {
     this.initializeFromStorage();
@@ -165,7 +164,7 @@ export class AuthService {
       // This is a placeholder implementation that would need to be adapted
       // based on the actual Airflow authentication setup
       
-      const loginData: LoginRequest = { username, password };
+      // const loginData: LoginRequest = { username, password };
       
       // For basic auth, we can create a token-like structure
       // In a real implementation, this would call the appropriate Airflow auth endpoint
@@ -204,15 +203,15 @@ export class AuthService {
   /**
    * Refresh authentication token
    */
-  public async refreshToken(): Promise<AuthToken> {
+  public async refreshToken(): Promise<{ token: AuthToken; user: User }> {
     if (!this.currentToken?.refresh_token) {
       throw new Error('No refresh token available');
     }
 
     try {
-      const refreshData: RefreshTokenRequest = {
-        refresh_token: this.currentToken.refresh_token,
-      };
+      // const refreshData: RefreshTokenRequest = {
+      //   refresh_token: this.currentToken.refresh_token,
+      // };
 
       // Note: This would need to be implemented based on Airflow's auth system
       // For now, we'll extend the current token
@@ -225,7 +224,10 @@ export class AuthService {
       this.setToken(newToken);
       this.storeAuth(newToken, this.currentUser || undefined);
 
-      return newToken;
+      return {
+        token: newToken,
+        user: this.currentUser || { username: 'unknown', roles: ['User'] },
+      };
     } catch (error) {
       // If refresh fails, logout user
       this.logout();

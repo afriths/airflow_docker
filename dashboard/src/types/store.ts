@@ -3,7 +3,7 @@
  * Defines the structure of the application state
  */
 
-import { DAG, DAGRun, TaskInstance, User, AuthToken, Notification, LoadingState } from './app';
+import type { DAG, DAGRun, TaskInstance, User, AuthToken, Notification } from './app';
 
 // Authentication state
 export interface AuthState {

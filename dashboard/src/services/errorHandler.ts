@@ -3,7 +3,7 @@
  * Centralized error handling and user-friendly error messages
  */
 
-import { APIError } from '../types/api';
+import type { APIError } from '../types/api';
 import { logConfig } from './config';
 
 /**

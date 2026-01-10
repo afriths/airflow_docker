@@ -15,8 +15,18 @@ export * from './store';
 // Component prop types
 export * from './components';
 
-// API parameter types
-export * from './api';
+// API parameter types (excluding duplicates from app.ts)
+export type {
+  APIClientConfig,
+  GetDAGsParams,
+  TriggerDAGRequest,
+  GetDAGRunsParams,
+  GetTaskInstancesParams,
+  GetTaskLogsParams,
+  LoginRequest,
+  RefreshTokenRequest,
+  RetryConfig,
+} from './api';
 
 // Utility types
 export type Optional<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;

@@ -3,7 +3,7 @@
  * Simplified types used throughout the application
  */
 
-import { TaskState, DAGRunState, DAGRunType } from './airflow';
+import type { TaskState, DAGRunState, DAGRunType } from './airflow';
 
 // Simplified DAG type for application use
 export interface DAG {

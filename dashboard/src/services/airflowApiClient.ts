@@ -3,8 +3,8 @@
  * Handles all communication with the Airflow REST API v2
  */
 
-import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, AxiosError } from 'axios';
-import {
+import axios, { type AxiosInstance, type AxiosResponse, type AxiosError } from 'axios';
+import type {
   AirflowDAGCollection,
   AirflowDAGRunCollection,
   AirflowTaskInstanceCollection,
@@ -13,7 +13,7 @@ import {
   AirflowTaskInstanceResponse,
   AirflowErrorResponse,
 } from '../types/airflow';
-import {
+import type {
   APIClientConfig,
   GetDAGsParams,
   TriggerDAGRequest,
@@ -24,7 +24,6 @@ import {
   APIError,
   RetryConfig,
 } from '../types/api';
-import { AuthToken } from '../types/app';
 
 /**
  * Default configuration for the API client
@@ -224,8 +223,8 @@ export class AirflowAPIClient {
    */
   public async getDAGs(params: Partial<GetDAGsParams> = {}): Promise<APIResponse<AirflowDAGCollection>> {
     const queryParams = this.buildQueryParams({
-      limit: params.limit || 100,
-      offset: params.offset || 0,
+      limit: params.limit ?? 100,
+      offset: params.offset ?? 0,
       dag_id_pattern: params.dag_id_pattern,
       only_active: params.only_active,
       paused: params.paused,
@@ -272,6 +271,20 @@ export class AirflowAPIClient {
     );
   }
 
+  /**
+   * Pause a DAG
+   */
+  public async pauseDAG(dagId: string): Promise<APIResponse<AirflowDAGResponse>> {
+    return this.updateDAG(dagId, true);
+  }
+
+  /**
+   * Unpause a DAG
+   */
+  public async unpauseDAG(dagId: string): Promise<APIResponse<AirflowDAGResponse>> {
+    return this.updateDAG(dagId, false);
+  }
+
   // ==================== DAG Run API Methods ====================
 
   /**
@@ -280,8 +293,8 @@ export class AirflowAPIClient {
   public async getDAGRuns(params: GetDAGRunsParams): Promise<APIResponse<AirflowDAGRunCollection>> {
     const { dag_id, ...queryParams } = params;
     const formattedParams = this.buildQueryParams({
-      limit: queryParams.limit || 25,
-      offset: queryParams.offset || 0,
+      limit: queryParams.limit ?? 25,
+      offset: queryParams.offset ?? 0,
       dag_run_id: queryParams.dag_run_id,
       execution_date_gte: queryParams.execution_date_gte,
       execution_date_lte: queryParams.execution_date_lte,
@@ -331,8 +344,8 @@ export class AirflowAPIClient {
   public async getTaskInstances(params: GetTaskInstancesParams): Promise<APIResponse<AirflowTaskInstanceCollection>> {
     const { dag_id, dag_run_id, ...queryParams } = params;
     const formattedParams = this.buildQueryParams({
-      limit: queryParams.limit || 100,
-      offset: queryParams.offset || 0,
+      limit: queryParams.limit ?? 100,
+      offset: queryParams.offset ?? 0,
       execution_date_gte: queryParams.execution_date_gte,
       execution_date_lte: queryParams.execution_date_lte,
       start_date_gte: queryParams.start_date_gte,
@@ -384,6 +397,48 @@ export class AirflowAPIClient {
       this.client.get<{ content: string }>(
         `/dags/${encodeURIComponent(dag_id)}/dagRuns/${encodeURIComponent(dag_run_id)}/taskInstances/${encodeURIComponent(task_id)}/logs/${task_try_number}`,
         { params: formattedParams }
+      )
+    );
+  }
+
+  /**
+   * Clear a task instance (set state to None)
+   */
+  public async clearTaskInstance(dagId: string, dagRunId: string, taskId: string): Promise<APIResponse<void>> {
+    return this.executeWithRetry(() =>
+      this.client.post<void>(
+        `/dags/${encodeURIComponent(dagId)}/clearTaskInstances`,
+        {
+          dag_run_id: dagRunId,
+          task_ids: [taskId],
+          reset_dag_runs: false,
+          only_failed: false,
+          only_running: false,
+        }
+      )
+    );
+  }
+
+  /**
+   * Mark task instance as success
+   */
+  public async markTaskSuccess(dagId: string, dagRunId: string, taskId: string): Promise<APIResponse<void>> {
+    return this.executeWithRetry(() =>
+      this.client.patch<void>(
+        `/dags/${encodeURIComponent(dagId)}/dagRuns/${encodeURIComponent(dagRunId)}/taskInstances/${encodeURIComponent(taskId)}`,
+        { state: 'success' }
+      )
+    );
+  }
+
+  /**
+   * Mark task instance as failed
+   */
+  public async markTaskFailed(dagId: string, dagRunId: string, taskId: string): Promise<APIResponse<void>> {
+    return this.executeWithRetry(() =>
+      this.client.patch<void>(
+        `/dags/${encodeURIComponent(dagId)}/dagRuns/${encodeURIComponent(dagRunId)}/taskInstances/${encodeURIComponent(taskId)}`,
+        { state: 'failed' }
       )
     );
   }
