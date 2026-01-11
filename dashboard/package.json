@@ -6,12 +6,19 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
+    "build:production": "cross-env NODE_ENV=production npm run type-check && vite build --mode production",
+    "build:staging": "cross-env NODE_ENV=staging npm run type-check && vite build --mode staging",
+    "build:development": "cross-env NODE_ENV=development npm run type-check && vite build --mode development",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write \"src/**/*.{ts,tsx,js,jsx,json,css,md}\"",
     "format:check": "prettier --check \"src/**/*.{ts,tsx,js,jsx,json,css,md}\"",
     "type-check": "tsc --noEmit",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "validate-env": "node scripts/validate-env.js",
+    "docker:build": "docker build -t airflow-dashboard .",
+    "docker:run": "docker run -p 3000:80 airflow-dashboard",
+    "health-check": "curl -f http://localhost:3000/health || exit 1"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
@@ -32,6 +39,7 @@
     "@types/react": "^19.2.5",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^5.1.1",
+    "cross-env": "^7.0.3",
     "eslint": "^9.39.1",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.4",

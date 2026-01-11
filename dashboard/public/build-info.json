@@ -1,0 +1,16 @@
+{
+  "name": "dashboard",
+  "version": "0.0.0",
+  "buildTime": "2026-01-11T07:46:32.009Z",
+  "environment": "development",
+  "git": {
+    "commit": "da9f780373d1784334e7340c747b27e9194d2c53",
+    "branch": "main",
+    "tag": "da9f780"
+  },
+  "node": {
+    "version": "v25.2.1",
+    "platform": "win32",
+    "arch": "x64"
+  }
+}

@@ -2,7 +2,19 @@ import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { CssBaseline } from '@mui/material';
 import { AuthProvider, ProtectedRoute, ErrorBoundary, NotificationList } from './components';
 import { AppRouter } from './router';
+import { validateEnvironment } from './config/environment';
 import './App.css';
+
+// Validate environment on app startup
+try {
+  validateEnvironment();
+} catch (error) {
+  console.error('Environment validation failed:', error);
+  // In production, you might want to show an error page instead
+  if (import.meta.env.PROD) {
+    throw error;
+  }
+}
 
 // Create responsive Material-UI theme with accessibility enhancements
 const theme = createTheme({
