@@ -17,6 +17,7 @@ export { default as DashboardSidebar } from './layout/DashboardSidebar';
 // DAG Components
 export { default as DAGList } from './DAGList';
 export { default as DAGTriggerDialog } from './DAGTriggerDialog';
+export { default as DAGRunHistory } from './DAGRunHistory';
 
 // Task Components
 export { default as TaskStatus } from './TaskStatus';
@@ -26,5 +27,8 @@ export { default as TaskTimeline } from './TaskTimeline';
 
 // Notification Components
 export { default as NotificationList } from './NotificationList';
+
+// Real-time Components
+export { default as RealTimeStatusIndicator } from './RealTimeStatusIndicator';
 
 // Component types are available through the component imports

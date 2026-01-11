@@ -17,13 +17,14 @@ import {
 } from '@mui/material';
 import { Menu as MenuIcon, Logout as LogoutIcon } from '@mui/icons-material';
 import { useAuth } from '../../hooks';
-import { LogoutButton } from '../index';
+import { LogoutButton, RealTimeStatusIndicator } from '../index';
 
 interface DashboardHeaderProps {
   title: string;
   actions?: React.ReactNode;
   onMenuClick: () => void;
   showMenuButton: boolean;
+  showRealTimeStatus?: boolean;
 }
 
 const DashboardHeader: React.FC<DashboardHeaderProps> = ({
@@ -31,6 +32,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
   actions,
   onMenuClick,
   showMenuButton,
+  showRealTimeStatus = true,
 }) => {
   const { user } = useAuth();
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
@@ -81,6 +83,13 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
       >
         {title}
       </Typography>
+
+      {/* Real-time status indicator */}
+      {showRealTimeStatus && (
+        <Box sx={{ mr: 2, display: { xs: 'none', md: 'block' } }}>
+          <RealTimeStatusIndicator showRefreshButton showSettings compact />
+        </Box>
+      )}
 
       {/* Custom actions */}
       {actions && <Box sx={{ mr: 2 }}>{actions}</Box>}
