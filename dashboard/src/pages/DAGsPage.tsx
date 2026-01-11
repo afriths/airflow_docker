@@ -4,29 +4,24 @@
  */
 
 import React from 'react';
-import {
-  Box,
-  Typography,
-  Card,
-  CardContent,
-  Alert,
-} from '@mui/material';
+import { useNavigate } from 'react-router-dom';
+import { Box, Typography } from '@mui/material';
+import { DAGList } from '../components';
 
 const DAGsPage: React.FC = () => {
+  const navigate = useNavigate();
+
+  const handleDAGSelect = (dagId: string) => {
+    navigate(`/dags/${dagId}`);
+  };
+
   return (
     <Box>
       <Typography variant="h4" gutterBottom>
         All DAGs
       </Typography>
 
-      <Card>
-        <CardContent>
-          <Alert severity="info">
-            DAG list component will be implemented in a future task.
-            This page will show all DAGs with search, filtering, and trigger capabilities.
-          </Alert>
-        </CardContent>
-      </Card>
+      <DAGList onDAGSelect={handleDAGSelect} />
     </Box>
   );
 };

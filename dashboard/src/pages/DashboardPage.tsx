@@ -22,15 +22,21 @@ import type { DAG } from '../types/app';
 import { useAppSelector } from '../store';
 
 const DashboardPage: React.FC = () => {
-  const { items: dags, loading } = useAppSelector((state) => state.dags);
+  const { items: dags, loading } = useAppSelector(state => state.dags);
 
   // Calculate dashboard metrics
   const totalDAGs = dags.length;
   const activeDAGs = dags.filter((dag: DAG) => !dag.is_paused).length;
   const pausedDAGs = dags.filter((dag: DAG) => dag.is_paused).length;
-  const successfulRuns = dags.filter((dag: DAG) => dag.last_run_state === 'success').length;
-  const failedRuns = dags.filter((dag: DAG) => dag.last_run_state === 'failed').length;
-  const runningDAGs = dags.filter((dag: DAG) => dag.last_run_state === 'running').length;
+  const successfulRuns = dags.filter(
+    (dag: DAG) => dag.last_run_state === 'success'
+  ).length;
+  const failedRuns = dags.filter(
+    (dag: DAG) => dag.last_run_state === 'failed'
+  ).length;
+  const runningDAGs = dags.filter(
+    (dag: DAG) => dag.last_run_state === 'running'
+  ).length;
 
   const metrics = [
     {
@@ -90,11 +96,16 @@ const DashboardPage: React.FC = () => {
 
       {/* Metrics Cards */}
       <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 3, mb: 4 }}>
-        {metrics.map((metric) => (
+        {metrics.map(metric => (
           <Box
             key={metric.title}
             sx={{
-              flex: { xs: '1 1 100%', sm: '1 1 calc(50% - 12px)', md: '1 1 calc(33.333% - 16px)', lg: '1 1 calc(16.666% - 20px)' },
+              flex: {
+                xs: '1 1 100%',
+                sm: '1 1 calc(50% - 12px)',
+                md: '1 1 calc(33.333% - 16px)',
+                lg: '1 1 calc(16.666% - 20px)',
+              },
               minWidth: 200,
             }}
           >
@@ -143,7 +154,7 @@ const DashboardPage: React.FC = () => {
           <Typography variant="h6" gutterBottom>
             Recent DAG Activity
           </Typography>
-          
+
           {dags.length === 0 ? (
             <Typography color="text.secondary">
               No DAGs available. Start by creating your first DAG.
@@ -173,7 +184,7 @@ const DashboardPage: React.FC = () => {
                       {dag.description || 'No description'}
                     </Typography>
                   </Box>
-                  
+
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                     {dag.is_paused && (
                       <Chip
@@ -183,7 +194,7 @@ const DashboardPage: React.FC = () => {
                         variant="outlined"
                       />
                     )}
-                    
+
                     {dag.last_run_state && (
                       <Chip
                         label={dag.last_run_state}
@@ -192,14 +203,14 @@ const DashboardPage: React.FC = () => {
                           dag.last_run_state === 'success'
                             ? 'success'
                             : dag.last_run_state === 'failed'
-                            ? 'error'
-                            : dag.last_run_state === 'running'
-                            ? 'warning'
-                            : 'default'
+                              ? 'error'
+                              : dag.last_run_state === 'running'
+                                ? 'warning'
+                                : 'default'
                         }
                       />
                     )}
-                    
+
                     {dag.last_run_date && (
                       <Typography variant="caption" color="text.secondary">
                         {new Date(dag.last_run_date).toLocaleDateString()}
@@ -208,7 +219,7 @@ const DashboardPage: React.FC = () => {
                   </Box>
                 </Box>
               ))}
-              
+
               {dags.length > 10 && (
                 <Box sx={{ mt: 2, textAlign: 'center' }}>
                   <Typography variant="body2" color="text.secondary">

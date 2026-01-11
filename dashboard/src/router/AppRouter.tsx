@@ -6,12 +6,7 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { DashboardLayout } from '../components';
-import {
-  DashboardPage,
-  DAGsPage,
-  DAGDetailPage,
-  HistoryPage,
-} from '../pages';
+import { DashboardPage, DAGsPage, DAGDetailPage, HistoryPage } from '../pages';
 
 const AppRouter: React.FC = () => {
   return (
@@ -26,7 +21,7 @@ const AppRouter: React.FC = () => {
             </DashboardLayout>
           }
         />
-        
+
         <Route
           path="/dags"
           element={
@@ -35,7 +30,7 @@ const AppRouter: React.FC = () => {
             </DashboardLayout>
           }
         />
-        
+
         <Route
           path="/dags/:dagId"
           element={
@@ -44,7 +39,7 @@ const AppRouter: React.FC = () => {
             </DashboardLayout>
           }
         />
-        
+
         <Route
           path="/history"
           element={

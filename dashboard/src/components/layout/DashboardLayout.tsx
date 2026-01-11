@@ -102,7 +102,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
       >
         {/* Toolbar spacer */}
         <Toolbar />
-        
+
         {/* Page content */}
         <Box
           sx={{

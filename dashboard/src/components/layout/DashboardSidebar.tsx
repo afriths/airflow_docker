@@ -44,8 +44,8 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ onClose }) => {
   const location = useLocation();
   const dispatch = useAppDispatch();
 
-  const { items: dags, loading, error } = useAppSelector((state) => state.dags);
-  const { selectedDAG } = useAppSelector((state) => state.ui);
+  const { items: dags, loading, error } = useAppSelector(state => state.dags);
+  const { selectedDAG } = useAppSelector(state => state.ui);
 
   const [dagsExpanded, setDAGsExpanded] = React.useState(true);
 
@@ -132,7 +132,7 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ onClose }) => {
 
       {/* Main navigation */}
       <List sx={{ px: 1, py: 2 }}>
-        {menuItems.map((item) => (
+        {menuItems.map(item => (
           <ListItem key={item.path} disablePadding sx={{ mb: 0.5 }}>
             <ListItemButton
               selected={isCurrentPath(item.path)}
@@ -184,7 +184,7 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ onClose }) => {
           />
           <IconButton
             size="small"
-            onClick={(e) => {
+            onClick={e => {
               e.stopPropagation();
               handleRefreshDAGs();
             }}
@@ -217,7 +217,10 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ onClose }) => {
             }}
           >
             {error && (
-              <Alert severity="error" sx={{ mx: 1, mb: 1, fontSize: '0.75rem' }}>
+              <Alert
+                severity="error"
+                sx={{ mx: 1, mb: 1, fontSize: '0.75rem' }}
+              >
                 Failed to load DAGs
               </Alert>
             )}
@@ -267,7 +270,8 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ onClose }) => {
                             variant="body2"
                             sx={{
                               fontSize: '0.75rem',
-                              fontWeight: selectedDAG === dag.dag_id ? 600 : 400,
+                              fontWeight:
+                                selectedDAG === dag.dag_id ? 600 : 400,
                               overflow: 'hidden',
                               textOverflow: 'ellipsis',
                               whiteSpace: 'nowrap',

@@ -4,13 +4,7 @@
  */
 
 import React from 'react';
-import {
-  Box,
-  Typography,
-  Card,
-  CardContent,
-  Alert,
-} from '@mui/material';
+import { Box, Typography, Card, CardContent, Alert } from '@mui/material';
 
 const HistoryPage: React.FC = () => {
   return (
@@ -22,8 +16,8 @@ const HistoryPage: React.FC = () => {
       <Card>
         <CardContent>
           <Alert severity="info">
-            Run history component will be implemented in a future task.
-            This page will show DAG run history with filtering and pagination.
+            Run history component will be implemented in a future task. This
+            page will show DAG run history with filtering and pagination.
           </Alert>
         </CardContent>
       </Card>

@@ -15,10 +15,7 @@ import {
   Divider,
   Chip,
 } from '@mui/material';
-import {
-  Menu as MenuIcon,
-  Logout as LogoutIcon,
-} from '@mui/icons-material';
+import { Menu as MenuIcon, Logout as LogoutIcon } from '@mui/icons-material';
 import { useAuth } from '../../hooks';
 import { LogoutButton } from '../index';
 
@@ -86,11 +83,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
       </Typography>
 
       {/* Custom actions */}
-      {actions && (
-        <Box sx={{ mr: 2 }}>
-          {actions}
-        </Box>
-      )}
+      {actions && <Box sx={{ mr: 2 }}>{actions}</Box>}
 
       {/* User info and menu */}
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -161,7 +154,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
             </Typography>
             {user?.roles && user.roles.length > 0 && (
               <Box sx={{ mt: 1, display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
-                {user.roles.map((role) => (
+                {user.roles.map(role => (
                   <Chip
                     key={role}
                     label={role}
