@@ -225,10 +225,12 @@ const DAGList: React.FC<DAGListProps> = ({
             display: 'grid',
             gridTemplateColumns: {
               xs: '1fr',
-              md: '2fr 1fr 1fr 2fr',
+              sm: '1fr 1fr',
+              md: '2fr 1fr 1fr auto',
             },
             gap: 2,
             alignItems: 'center',
+            mb: 3,
           }}
         >
           <TextField

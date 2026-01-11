@@ -1,6 +1,7 @@
 /**
  * Dashboard Header Component
  * Top navigation bar with user info and actions
+ * Enhanced with accessibility features
  */
 
 import React from 'react';
@@ -14,9 +15,10 @@ import {
   MenuItem,
   Divider,
   Chip,
+  Tooltip,
 } from '@mui/material';
 import { Menu as MenuIcon, Logout as LogoutIcon } from '@mui/icons-material';
-import { useAuth } from '../../hooks';
+import { useAuth, useAccessibility } from '../../hooks';
 import { LogoutButton, RealTimeStatusIndicator, ConnectionStatusChip } from '../index';
 
 interface DashboardHeaderProps {
@@ -37,7 +39,9 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
   isOnline = true,
 }) => {
   const { user } = useAuth();
+  const { generateId, getAriaLabel } = useAccessibility();
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+  const menuId = generateId('user-menu');
 
   const handleUserMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -65,41 +69,67 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
     <Toolbar>
       {/* Menu button for mobile/collapsed sidebar */}
       {showMenuButton && (
-        <IconButton
-          color="inherit"
-          aria-label="open drawer"
-          onClick={onMenuClick}
-          edge="start"
-          sx={{ mr: 2 }}
-        >
-          <MenuIcon />
-        </IconButton>
+        <Tooltip title="Toggle navigation menu">
+          <IconButton
+            color="inherit"
+            aria-label="Toggle navigation menu"
+            onClick={onMenuClick}
+            edge="start"
+            sx={{ mr: 2 }}
+          >
+            <MenuIcon />
+          </IconButton>
+        </Tooltip>
       )}
 
       {/* Page title */}
       <Typography
         variant="h6"
         noWrap
-        component="div"
-        sx={{ flexGrow: 1, fontWeight: 600 }}
+        component="h1"
+        sx={{ 
+          flexGrow: 1, 
+          fontWeight: 600,
+          fontSize: {
+            xs: '1rem',
+            sm: '1.25rem',
+          },
+        }}
+        id="page-title"
       >
         {title}
       </Typography>
 
       {/* Connection status */}
       <Box sx={{ mr: 2, display: { xs: 'none', sm: 'block' } }}>
-        <ConnectionStatusChip isOnline={isOnline} size="small" />
+        <ConnectionStatusChip 
+          isOnline={isOnline} 
+          size="small"
+          aria-label={getAriaLabel(
+            isOnline ? 'Connected' : 'Offline',
+            'Connection status'
+          )}
+        />
       </Box>
 
       {/* Real-time status indicator */}
       {showRealTimeStatus && (
         <Box sx={{ mr: 2, display: { xs: 'none', md: 'block' } }}>
-          <RealTimeStatusIndicator showRefreshButton showSettings compact />
+          <RealTimeStatusIndicator 
+            showRefreshButton 
+            showSettings 
+            compact 
+            aria-label="Real-time updates status"
+          />
         </Box>
       )}
 
       {/* Custom actions */}
-      {actions && <Box sx={{ mr: 2 }}>{actions}</Box>}
+      {actions && (
+        <Box sx={{ mr: 2, display: 'flex', gap: 1 }}>
+          {actions}
+        </Box>
+      )}
 
       {/* User info and menu */}
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -114,33 +144,38 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
               borderColor: 'rgba(255, 255, 255, 0.3)',
               display: { xs: 'none', sm: 'flex' },
             }}
+            aria-label={getAriaLabel(user.roles[0], 'User role')}
           />
         )}
 
         {/* User avatar and menu */}
-        <IconButton
-          size="large"
-          aria-label="account of current user"
-          aria-controls="user-menu"
-          aria-haspopup="true"
-          onClick={handleUserMenuOpen}
-          color="inherit"
-          sx={{ p: 0.5 }}
-        >
-          <Avatar
-            sx={{
-              width: 32,
-              height: 32,
-              bgcolor: 'rgba(255, 255, 255, 0.2)',
-              fontSize: '0.875rem',
-            }}
+        <Tooltip title={`User menu for ${getUserDisplayName()}`}>
+          <IconButton
+            size="large"
+            aria-label={getAriaLabel('User account menu', getUserDisplayName())}
+            aria-controls={Boolean(anchorEl) ? menuId : undefined}
+            aria-haspopup="true"
+            aria-expanded={Boolean(anchorEl)}
+            onClick={handleUserMenuOpen}
+            color="inherit"
+            sx={{ p: 0.5 }}
           >
-            {getUserInitials()}
-          </Avatar>
-        </IconButton>
+            <Avatar
+              sx={{
+                width: { xs: 28, sm: 32 },
+                height: { xs: 28, sm: 32 },
+                bgcolor: 'rgba(255, 255, 255, 0.2)',
+                fontSize: { xs: '0.75rem', sm: '0.875rem' },
+              }}
+              alt={getUserDisplayName()}
+            >
+              {getUserInitials()}
+            </Avatar>
+          </IconButton>
+        </Tooltip>
 
         <Menu
-          id="user-menu"
+          id={menuId}
           anchorEl={anchorEl}
           anchorOrigin={{
             vertical: 'bottom',
@@ -159,17 +194,33 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
               minWidth: 200,
             },
           }}
+          MenuListProps={{
+            'aria-labelledby': 'user-menu-button',
+            role: 'menu',
+          }}
         >
           {/* User info */}
-          <Box sx={{ px: 2, py: 1 }}>
-            <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+          <Box sx={{ px: 2, py: 1 }} role="presentation">
+            <Typography 
+              variant="subtitle2" 
+              sx={{ fontWeight: 600 }}
+              id="user-display-name"
+            >
               {getUserDisplayName()}
             </Typography>
-            <Typography variant="body2" color="text.secondary">
+            <Typography 
+              variant="body2" 
+              color="text.secondary"
+              aria-describedby="user-display-name"
+            >
               {user?.email || user?.username}
             </Typography>
             {user?.roles && user.roles.length > 0 && (
-              <Box sx={{ mt: 1, display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
+              <Box 
+                sx={{ mt: 1, display: 'flex', gap: 0.5, flexWrap: 'wrap' }}
+                role="list"
+                aria-label="User roles"
+              >
                 {user.roles.map(role => (
                   <Chip
                     key={role}
@@ -177,6 +228,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
                     size="small"
                     variant="outlined"
                     sx={{ fontSize: '0.75rem', height: 20 }}
+                    role="listitem"
                   />
                 ))}
               </Box>
@@ -192,8 +244,9 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
               // LogoutButton will handle the actual logout
             }}
             sx={{ py: 1 }}
+            role="menuitem"
           >
-            <LogoutIcon sx={{ mr: 1, fontSize: 20 }} />
+            <LogoutIcon sx={{ mr: 1, fontSize: 20 }} aria-hidden="true" />
             <LogoutButton variant="menu" />
           </MenuItem>
         </Menu>

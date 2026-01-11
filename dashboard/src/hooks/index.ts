@@ -49,3 +49,21 @@ export {
   type OfflineSupportReturn,
   type CachedData
 } from './useOfflineSupport';
+
+// Responsive design and accessibility hooks
+export { 
+  useKeyboardNavigation,
+  type KeyboardNavigationOptions,
+  type KeyboardNavigationReturn
+} from './useKeyboardNavigation';
+
+export { 
+  useResponsive,
+  type ResponsiveReturn
+} from './useResponsive';
+
+export { 
+  useAccessibility,
+  type AccessibilityOptions,
+  type AccessibilityReturn
+} from './useAccessibility';

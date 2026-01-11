@@ -1,9 +1,10 @@
 /**
  * Dashboard Sidebar Component
  * Navigation sidebar with DAG list preview and menu items
+ * Enhanced with keyboard navigation and accessibility features
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import {
   Box,
   Toolbar,
@@ -19,6 +20,7 @@ import {
   Collapse,
   CircularProgress,
   Alert,
+  Tooltip,
 } from '@mui/material';
 import {
   Dashboard as DashboardIcon,
@@ -34,6 +36,7 @@ import type { DAG } from '../../types/app';
 import { useAppSelector, useAppDispatch } from '../../store';
 import { fetchDAGs } from '../../store/slices/dagsSlice';
 import { setSelectedDAG } from '../../store/slices/uiSlice';
+import { useKeyboardNavigation, useAccessibility } from '../../hooks';
 
 interface DashboardSidebarProps {
   onClose: () => void;
@@ -43,30 +46,66 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ onClose }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const dispatch = useAppDispatch();
+  const sidebarRef = useRef<HTMLDivElement>(null);
 
   const { items: dags, loading, error } = useAppSelector(state => state.dags);
   const { selectedDAG } = useAppSelector(state => state.ui);
 
   const [dagsExpanded, setDAGsExpanded] = React.useState(true);
 
+  const { generateId, getAriaLabel, announce } = useAccessibility();
+  const { handleKeyDown, trapFocus } = useKeyboardNavigation({
+    enableArrowNavigation: true,
+    enableTabNavigation: true,
+    onEscape: onClose,
+    customShortcuts: {
+      'enter': () => {
+        const focusedElement = document.activeElement as HTMLElement;
+        if (focusedElement && focusedElement.click) {
+          focusedElement.click();
+        }
+      },
+    },
+  });
+
   // Load DAGs on component mount
   useEffect(() => {
     dispatch(fetchDAGs({}));
   }, [dispatch]);
 
-  const handleNavigation = (path: string) => {
+  // Set up focus trap for sidebar
+  useEffect(() => {
+    if (sidebarRef.current) {
+      const cleanup = trapFocus(sidebarRef);
+      return cleanup;
+    }
+  }, [trapFocus]);
+
+  const handleNavigation = (path: string, label: string) => {
     navigate(path);
+    announce(`Navigated to ${label}`, 'polite');
     onClose(); // Close sidebar on mobile after navigation
   };
 
   const handleDAGSelect = (dagId: string) => {
     dispatch(setSelectedDAG(dagId));
     navigate(`/dags/${dagId}`);
+    announce(`Selected DAG ${dagId}`, 'polite');
     onClose();
   };
 
   const handleRefreshDAGs = () => {
     dispatch(fetchDAGs({}));
+    announce('Refreshing DAG list', 'polite');
+  };
+
+  const handleDAGsToggle = () => {
+    const newExpanded = !dagsExpanded;
+    setDAGsExpanded(newExpanded);
+    announce(
+      newExpanded ? 'DAG list expanded' : 'DAG list collapsed',
+      'polite'
+    );
   };
 
   const getStatusColor = (state: string | null) => {
@@ -91,21 +130,33 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ onClose }) => {
       text: 'Dashboard',
       icon: <DashboardIcon />,
       path: '/',
+      shortcut: 'Ctrl+1',
     },
     {
       text: 'All DAGs',
       icon: <PlayArrowIcon />,
       path: '/dags',
+      shortcut: 'Ctrl+2',
     },
     {
       text: 'Run History',
       icon: <HistoryIcon />,
       path: '/history',
+      shortcut: 'Ctrl+3',
     },
   ];
 
+  const navigationId = generateId('navigation');
+  const dagsListId = generateId('dags-list');
+
   return (
-    <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+    <Box 
+      ref={sidebarRef}
+      sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}
+      onKeyDown={handleKeyDown}
+      role="navigation"
+      aria-label="Main navigation"
+    >
       {/* Logo/Brand area */}
       <Toolbar
         sx={{
@@ -116,7 +167,7 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ onClose }) => {
         }}
       >
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <DAGIcon color="primary" />
+          <DAGIcon color="primary" aria-hidden="true" />
           <Typography
             variant="h6"
             sx={{
@@ -124,6 +175,7 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ onClose }) => {
               color: 'primary.main',
               fontSize: '1.1rem',
             }}
+            component="h2"
           >
             Airflow
           </Typography>
@@ -131,35 +183,65 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ onClose }) => {
       </Toolbar>
 
       {/* Main navigation */}
-      <List sx={{ px: 1, py: 2 }}>
+      <List 
+        sx={{ px: 1, py: 2 }}
+        role="menubar"
+        aria-labelledby={navigationId}
+      >
+        <Typography
+          id={navigationId}
+          variant="srOnly"
+          component="h3"
+          sx={{
+            position: 'absolute',
+            left: '-10000px',
+            width: '1px',
+            height: '1px',
+            overflow: 'hidden',
+          }}
+        >
+          Main Navigation
+        </Typography>
+        
         {menuItems.map(item => (
           <ListItem key={item.path} disablePadding sx={{ mb: 0.5 }}>
-            <ListItemButton
-              selected={isCurrentPath(item.path)}
-              onClick={() => handleNavigation(item.path)}
-              sx={{
-                borderRadius: 1,
-                '&.Mui-selected': {
-                  backgroundColor: 'primary.main',
-                  color: 'primary.contrastText',
-                  '&:hover': {
-                    backgroundColor: 'primary.dark',
-                  },
-                  '& .MuiListItemIcon-root': {
-                    color: 'primary.contrastText',
-                  },
-                },
-              }}
+            <Tooltip 
+              title={`${item.text} (${item.shortcut})`}
+              placement="right"
+              arrow
             >
-              <ListItemIcon sx={{ minWidth: 40 }}>{item.icon}</ListItemIcon>
-              <ListItemText
-                primary={item.text}
-                primaryTypographyProps={{
-                  fontSize: '0.875rem',
-                  fontWeight: isCurrentPath(item.path) ? 600 : 400,
+              <ListItemButton
+                selected={isCurrentPath(item.path)}
+                onClick={() => handleNavigation(item.path, item.text)}
+                sx={{
+                  borderRadius: 1,
+                  '&.Mui-selected': {
+                    backgroundColor: 'primary.main',
+                    color: 'primary.contrastText',
+                    '&:hover': {
+                      backgroundColor: 'primary.dark',
+                    },
+                    '& .MuiListItemIcon-root': {
+                      color: 'primary.contrastText',
+                    },
+                  },
                 }}
-              />
-            </ListItemButton>
+                role="menuitem"
+                aria-label={getAriaLabel(item.text, `Navigate to ${item.text}`)}
+                tabIndex={0}
+              >
+                <ListItemIcon sx={{ minWidth: 40 }} aria-hidden="true">
+                  {item.icon}
+                </ListItemIcon>
+                <ListItemText
+                  primary={item.text}
+                  primaryTypographyProps={{
+                    fontSize: '0.875rem',
+                    fontWeight: isCurrentPath(item.path) ? 600 : 400,
+                  }}
+                />
+              </ListItemButton>
+            </Tooltip>
           </ListItem>
         ))}
       </List>
@@ -169,10 +251,16 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ onClose }) => {
       {/* DAGs section */}
       <Box sx={{ px: 1, py: 1, flexGrow: 1, overflow: 'hidden' }}>
         <ListItemButton
-          onClick={() => setDAGsExpanded(!dagsExpanded)}
+          onClick={handleDAGsToggle}
           sx={{ borderRadius: 1, mb: 1 }}
+          aria-expanded={dagsExpanded}
+          aria-controls={dagsListId}
+          aria-label={getAriaLabel(
+            'DAGs section',
+            dagsExpanded ? 'Collapse DAG list' : 'Expand DAG list'
+          )}
         >
-          <ListItemIcon sx={{ minWidth: 40 }}>
+          <ListItemIcon sx={{ minWidth: 40 }} aria-hidden="true">
             <DAGIcon />
           </ListItemIcon>
           <ListItemText
@@ -182,25 +270,33 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ onClose }) => {
               fontWeight: 600,
             }}
           />
-          <IconButton
-            size="small"
-            onClick={e => {
-              e.stopPropagation();
-              handleRefreshDAGs();
-            }}
-            disabled={loading}
-          >
-            {loading ? (
-              <CircularProgress size={16} />
-            ) : (
-              <RefreshIcon fontSize="small" />
-            )}
-          </IconButton>
-          {dagsExpanded ? <ExpandLess /> : <ExpandMore />}
+          <Tooltip title="Refresh DAGs">
+            <IconButton
+              size="small"
+              onClick={e => {
+                e.stopPropagation();
+                handleRefreshDAGs();
+              }}
+              disabled={loading}
+              aria-label="Refresh DAG list"
+            >
+              {loading ? (
+                <CircularProgress size={16} />
+              ) : (
+                <RefreshIcon fontSize="small" />
+              )}
+            </IconButton>
+          </Tooltip>
+          {dagsExpanded ? (
+            <ExpandLess aria-hidden="true" />
+          ) : (
+            <ExpandMore aria-hidden="true" />
+          )}
         </ListItemButton>
 
         <Collapse in={dagsExpanded} timeout="auto" unmountOnExit>
           <Box
+            id={dagsListId}
             sx={{
               maxHeight: 'calc(100vh - 300px)',
               overflow: 'auto',
@@ -215,18 +311,25 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ onClose }) => {
                 borderRadius: 3,
               },
             }}
+            role="region"
+            aria-label="DAG list"
           >
             {error && (
               <Alert
                 severity="error"
                 sx={{ mx: 1, mb: 1, fontSize: '0.75rem' }}
+                role="alert"
               >
                 Failed to load DAGs
               </Alert>
             )}
 
             {loading && dags.length === 0 && (
-              <Box sx={{ display: 'flex', justifyContent: 'center', py: 2 }}>
+              <Box 
+                sx={{ display: 'flex', justifyContent: 'center', py: 2 }}
+                role="status"
+                aria-label="Loading DAGs"
+              >
                 <CircularProgress size={24} />
               </Box>
             )}
@@ -236,12 +339,13 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ onClose }) => {
                 variant="body2"
                 color="text.secondary"
                 sx={{ px: 2, py: 1, fontSize: '0.75rem' }}
+                role="status"
               >
                 No DAGs found
               </Typography>
             )}
 
-            <List dense sx={{ py: 0 }}>
+            <List dense sx={{ py: 0 }} role="menu" aria-label="Available DAGs">
               {dags.slice(0, 20).map((dag: DAG) => (
                 <ListItem key={dag.dag_id} disablePadding sx={{ mb: 0.5 }}>
                   <ListItemButton
@@ -255,6 +359,13 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ onClose }) => {
                         backgroundColor: 'action.selected',
                       },
                     }}
+                    role="menuitem"
+                    aria-label={getAriaLabel(
+                      dag.dag_id,
+                      `DAG ${dag.dag_id}, status: ${dag.last_run_state || 'never run'}${
+                        dag.is_paused ? ', paused' : ''
+                      }`
+                    )}
                   >
                     <ListItemText
                       primary={
@@ -292,6 +403,7 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ onClose }) => {
                                   px: 0.5,
                                 },
                               }}
+                              aria-label={`Status: ${dag.last_run_state}`}
                             />
                           )}
                         </Box>
@@ -319,6 +431,7 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ onClose }) => {
                   variant="caption"
                   color="text.secondary"
                   sx={{ fontSize: '0.625rem' }}
+                  role="status"
                 >
                   +{dags.length - 20} more DAGs
                 </Typography>
