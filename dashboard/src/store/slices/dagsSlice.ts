@@ -3,7 +3,11 @@
  * Manages DAG list state and actions
  */
 
-import { createSlice, createAsyncThunk, type PayloadAction } from '@reduxjs/toolkit';
+import {
+  createSlice,
+  createAsyncThunk,
+  type PayloadAction,
+} from '@reduxjs/toolkit';
 import type { DAGsState, TriggerDAGPayload } from '../../types/store';
 import type { DAG, DAGFilters } from '../../types/app';
 import { airflowApiClient } from '../../services';
@@ -82,7 +86,7 @@ const dagsSlice = createSlice({
   initialState,
   reducers: {
     // Clear DAGs error
-    clearDAGsError: (state) => {
+    clearDAGsError: state => {
       state.error = null;
     },
     // Set selected DAG
@@ -90,14 +94,19 @@ const dagsSlice = createSlice({
       state.selectedDAG = action.payload;
     },
     // Update DAG in the list
-    updateDAG: (state, action: PayloadAction<Partial<DAG> & { dag_id: string }>) => {
-      const index = state.items.findIndex(dag => dag.dag_id === action.payload.dag_id);
+    updateDAG: (
+      state,
+      action: PayloadAction<Partial<DAG> & { dag_id: string }>
+    ) => {
+      const index = state.items.findIndex(
+        dag => dag.dag_id === action.payload.dag_id
+      );
       if (index !== -1) {
         state.items[index] = { ...state.items[index], ...action.payload };
       }
     },
     // Reset DAGs state
-    resetDAGs: (state) => {
+    resetDAGs: state => {
       state.items = [];
       state.loading = false;
       state.error = null;
@@ -105,10 +114,10 @@ const dagsSlice = createSlice({
       state.selectedDAG = null;
     },
   },
-  extraReducers: (builder) => {
+  extraReducers: builder => {
     // Fetch DAGs
     builder
-      .addCase(fetchDAGs.pending, (state) => {
+      .addCase(fetchDAGs.pending, state => {
         state.loading = true;
         state.error = null;
       })
@@ -125,17 +134,20 @@ const dagsSlice = createSlice({
 
     // Trigger DAG
     builder
-      .addCase(triggerDAG.pending, (state) => {
+      .addCase(triggerDAG.pending, state => {
         state.loading = true;
         state.error = null;
       })
       .addCase(triggerDAG.fulfilled, (state, action) => {
         state.loading = false;
         // Update the DAG's last run information
-        const dagIndex = state.items.findIndex(dag => dag.dag_id === action.payload.dagId);
+        const dagIndex = state.items.findIndex(
+          dag => dag.dag_id === action.payload.dagId
+        );
         if (dagIndex !== -1) {
           state.items[dagIndex].last_run_state = action.payload.dagRun.state;
-          state.items[dagIndex].last_run_date = action.payload.dagRun.start_date;
+          state.items[dagIndex].last_run_date =
+            action.payload.dagRun.start_date;
         }
         state.error = null;
       })
@@ -146,13 +158,15 @@ const dagsSlice = createSlice({
 
     // Pause DAG
     builder
-      .addCase(pauseDAG.pending, (state) => {
+      .addCase(pauseDAG.pending, state => {
         state.loading = true;
         state.error = null;
       })
       .addCase(pauseDAG.fulfilled, (state, action) => {
         state.loading = false;
-        const dagIndex = state.items.findIndex(dag => dag.dag_id === action.payload);
+        const dagIndex = state.items.findIndex(
+          dag => dag.dag_id === action.payload
+        );
         if (dagIndex !== -1) {
           state.items[dagIndex].is_paused = true;
         }
@@ -165,13 +179,15 @@ const dagsSlice = createSlice({
 
     // Unpause DAG
     builder
-      .addCase(unpauseDAG.pending, (state) => {
+      .addCase(unpauseDAG.pending, state => {
         state.loading = true;
         state.error = null;
       })
       .addCase(unpauseDAG.fulfilled, (state, action) => {
         state.loading = false;
-        const dagIndex = state.items.findIndex(dag => dag.dag_id === action.payload);
+        const dagIndex = state.items.findIndex(
+          dag => dag.dag_id === action.payload
+        );
         if (dagIndex !== -1) {
           state.items[dagIndex].is_paused = false;
         }
@@ -185,7 +201,8 @@ const dagsSlice = createSlice({
 });
 
 // Export actions
-export const { clearDAGsError, setSelectedDAG, updateDAG, resetDAGs } = dagsSlice.actions;
+export const { clearDAGsError, setSelectedDAG, updateDAG, resetDAGs } =
+  dagsSlice.actions;
 
 // Export reducer
 export default dagsSlice.reducer;

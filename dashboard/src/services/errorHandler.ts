@@ -14,7 +14,7 @@ export type ErrorSeverity = 'low' | 'medium' | 'high' | 'critical';
 /**
  * Error categories
  */
-export type ErrorCategory = 
+export type ErrorCategory =
   | 'network'
   | 'authentication'
   | 'authorization'
@@ -40,7 +40,7 @@ export interface EnhancedError extends APIError {
 const ERROR_MESSAGES: Record<number, string> = {
   400: 'Invalid request. Please check your input and try again.',
   401: 'Authentication required. Please log in to continue.',
-  403: 'Access denied. You don\'t have permission to perform this action.',
+  403: "Access denied. You don't have permission to perform this action.",
   404: 'The requested resource was not found.',
   409: 'Conflict detected. The resource may have been modified by another user.',
   422: 'Invalid data provided. Please check your input and try again.',
@@ -157,7 +157,11 @@ function getUserMessage(error: APIError): string {
   }
 
   // Use error message from API if it's user-friendly
-  if (error.message && !error.message.includes('Error:') && error.message.length < 200) {
+  if (
+    error.message &&
+    !error.message.includes('Error:') &&
+    error.message.length < 200
+  ) {
     return error.message;
   }
 

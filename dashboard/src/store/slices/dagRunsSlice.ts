@@ -3,11 +3,18 @@
  * Manages DAG run history state and actions
  */
 
-import { createSlice, createAsyncThunk, type PayloadAction } from '@reduxjs/toolkit';
+import {
+  createSlice,
+  createAsyncThunk,
+  type PayloadAction,
+} from '@reduxjs/toolkit';
 import type { DAGRunsState, FetchDAGRunsPayload } from '../../types/store';
 import type { DAGRun, DAGRunFilters } from '../../types/app';
 import { airflowApiClient } from '../../services';
-import { transformDAGRuns, transformDAGRun } from '../../services/apiTransformers';
+import {
+  transformDAGRuns,
+  transformDAGRun,
+} from '../../services/apiTransformers';
 
 // Initial state
 const initialState: DAGRunsState = {};
@@ -15,7 +22,10 @@ const initialState: DAGRunsState = {};
 // Async thunks for DAG run actions
 export const fetchDAGRuns = createAsyncThunk(
   'dagRuns/fetchDAGRuns',
-  async (payload: FetchDAGRunsPayload & { filters?: DAGRunFilters }, { rejectWithValue }) => {
+  async (
+    payload: FetchDAGRunsPayload & { filters?: DAGRunFilters },
+    { rejectWithValue }
+  ) => {
     try {
       const response = await airflowApiClient.getDAGRuns({
         dag_id: payload.dagId,
@@ -23,7 +33,7 @@ export const fetchDAGRuns = createAsyncThunk(
         offset: payload.offset || 0,
         ...payload.filters,
       });
-      
+
       return {
         dagId: payload.dagId,
         runs: transformDAGRuns(response.data.dag_runs), // Transform Airflow DAG runs to app DAG runs
@@ -37,7 +47,10 @@ export const fetchDAGRuns = createAsyncThunk(
 
 export const fetchDAGRun = createAsyncThunk(
   'dagRuns/fetchDAGRun',
-  async ({ dagId, dagRunId }: { dagId: string; dagRunId: string }, { rejectWithValue }) => {
+  async (
+    { dagId, dagRunId }: { dagId: string; dagRunId: string },
+    { rejectWithValue }
+  ) => {
     try {
       const response = await airflowApiClient.getDAGRun(dagId, dagRunId);
       return {
@@ -53,7 +66,10 @@ export const fetchDAGRun = createAsyncThunk(
 
 export const deleteDAGRun = createAsyncThunk(
   'dagRuns/deleteDAGRun',
-  async ({ dagId, dagRunId }: { dagId: string; dagRunId: string }, { rejectWithValue }) => {
+  async (
+    { dagId, dagRunId }: { dagId: string; dagRunId: string },
+    { rejectWithValue }
+  ) => {
     try {
       await airflowApiClient.deleteDAGRun(dagId, dagRunId);
       return { dagId, dagRunId };
@@ -79,24 +95,41 @@ const dagRunsSlice = createSlice({
       }
     },
     // Set selected DAG run
-    setSelectedDAGRun: (state, action: PayloadAction<{ dagId: string; runId: string | null }>) => {
+    setSelectedDAGRun: (
+      state,
+      action: PayloadAction<{ dagId: string; runId: string | null }>
+    ) => {
       const { dagId, runId } = action.payload;
       if (state[dagId]) {
         state[dagId].selectedRun = runId;
       }
     },
     // Update specific DAG run
-    updateDAGRun: (state, action: PayloadAction<{ dagId: string; dagRun: Partial<DAGRun> & { dag_run_id: string } }>) => {
+    updateDAGRun: (
+      state,
+      action: PayloadAction<{
+        dagId: string;
+        dagRun: Partial<DAGRun> & { dag_run_id: string };
+      }>
+    ) => {
       const { dagId, dagRun } = action.payload;
       if (state[dagId]) {
-        const runIndex = state[dagId].runs.findIndex(run => run.dag_run_id === dagRun.dag_run_id);
+        const runIndex = state[dagId].runs.findIndex(
+          run => run.dag_run_id === dagRun.dag_run_id
+        );
         if (runIndex !== -1) {
-          state[dagId].runs[runIndex] = { ...state[dagId].runs[runIndex], ...dagRun };
+          state[dagId].runs[runIndex] = {
+            ...state[dagId].runs[runIndex],
+            ...dagRun,
+          };
         }
       }
     },
     // Add new DAG run (for when a DAG is triggered)
-    addDAGRun: (state, action: PayloadAction<{ dagId: string; dagRun: DAGRun }>) => {
+    addDAGRun: (
+      state,
+      action: PayloadAction<{ dagId: string; dagRun: DAGRun }>
+    ) => {
       const { dagId, dagRun } = action.payload;
       if (!state[dagId]) {
         state[dagId] = {
@@ -118,7 +151,7 @@ const dagRunsSlice = createSlice({
     // Reset all DAG runs
     resetAllDAGRuns: () => initialState,
   },
-  extraReducers: (builder) => {
+  extraReducers: builder => {
     // Fetch DAG runs
     builder
       .addCase(fetchDAGRuns.pending, (state, action) => {
@@ -169,15 +202,17 @@ const dagRunsSlice = createSlice({
       .addCase(fetchDAGRun.fulfilled, (state, action) => {
         const { dagId, dagRun, timestamp } = action.payload;
         state[dagId].loading = false;
-        
+
         // Update existing run or add new one
-        const runIndex = state[dagId].runs.findIndex(run => run.dag_run_id === dagRun.dag_run_id);
+        const runIndex = state[dagId].runs.findIndex(
+          run => run.dag_run_id === dagRun.dag_run_id
+        );
         if (runIndex !== -1) {
           state[dagId].runs[runIndex] = dagRun;
         } else {
           state[dagId].runs.unshift(dagRun);
         }
-        
+
         state[dagId].lastUpdated = timestamp;
         state[dagId].error = null;
       })
@@ -202,7 +237,9 @@ const dagRunsSlice = createSlice({
         const { dagId, dagRunId } = action.payload;
         if (state[dagId]) {
           state[dagId].loading = false;
-          state[dagId].runs = state[dagId].runs.filter(run => run.dag_run_id !== dagRunId);
+          state[dagId].runs = state[dagId].runs.filter(
+            run => run.dag_run_id !== dagRunId
+          );
           if (state[dagId].selectedRun === dagRunId) {
             state[dagId].selectedRun = null;
           }

@@ -8,11 +8,7 @@ import type {
   AirflowDAGRunResponse,
   AirflowTaskInstanceResponse,
 } from '../types/airflow';
-import type {
-  DAG,
-  DAGRun,
-  TaskInstance,
-} from '../types/app';
+import type { DAG, DAGRun, TaskInstance } from '../types/app';
 
 /**
  * Transform Airflow DAG response to application DAG type
@@ -43,9 +39,13 @@ export function transformDAGs(airflowDAGs: AirflowDAGResponse[]): DAG[] {
  * Transform Airflow DAG Run response to application DAG Run type
  */
 export function transformDAGRun(airflowDAGRun: AirflowDAGRunResponse): DAGRun {
-  const startTime = airflowDAGRun.start_date ? new Date(airflowDAGRun.start_date).getTime() : null;
-  const endTime = airflowDAGRun.end_date ? new Date(airflowDAGRun.end_date).getTime() : null;
-  
+  const startTime = airflowDAGRun.start_date
+    ? new Date(airflowDAGRun.start_date).getTime()
+    : null;
+  const endTime = airflowDAGRun.end_date
+    ? new Date(airflowDAGRun.end_date).getTime()
+    : null;
+
   return {
     dag_run_id: airflowDAGRun.dag_run_id,
     dag_id: airflowDAGRun.dag_id,
@@ -56,21 +56,28 @@ export function transformDAGRun(airflowDAGRun: AirflowDAGRunResponse): DAGRun {
     run_type: airflowDAGRun.run_type,
     external_trigger: airflowDAGRun.external_trigger,
     conf: airflowDAGRun.conf,
-    duration: startTime && endTime ? Math.round((endTime - startTime) / 1000) : undefined,
+    duration:
+      startTime && endTime
+        ? Math.round((endTime - startTime) / 1000)
+        : undefined,
   };
 }
 
 /**
  * Transform array of Airflow DAG Run responses to application DAG Run types
  */
-export function transformDAGRuns(airflowDAGRuns: AirflowDAGRunResponse[]): DAGRun[] {
+export function transformDAGRuns(
+  airflowDAGRuns: AirflowDAGRunResponse[]
+): DAGRun[] {
   return airflowDAGRuns.map(transformDAGRun);
 }
 
 /**
  * Transform Airflow Task Instance response to application Task Instance type
  */
-export function transformTaskInstance(airflowTaskInstance: AirflowTaskInstanceResponse): TaskInstance {
+export function transformTaskInstance(
+  airflowTaskInstance: AirflowTaskInstanceResponse
+): TaskInstance {
   return {
     task_id: airflowTaskInstance.task_id,
     dag_id: airflowTaskInstance.dag_id,
@@ -91,21 +98,26 @@ export function transformTaskInstance(airflowTaskInstance: AirflowTaskInstanceRe
 /**
  * Transform array of Airflow Task Instance responses to application Task Instance types
  */
-export function transformTaskInstances(airflowTaskInstances: AirflowTaskInstanceResponse[]): TaskInstance[] {
+export function transformTaskInstances(
+  airflowTaskInstances: AirflowTaskInstanceResponse[]
+): TaskInstance[] {
   return airflowTaskInstances.map(transformTaskInstance);
 }
 
 /**
  * Calculate duration in seconds from start and end dates
  */
-export function calculateDuration(startDate: string | null, endDate: string | null): number | null {
+export function calculateDuration(
+  startDate: string | null,
+  endDate: string | null
+): number | null {
   if (!startDate || !endDate) {
     return null;
   }
 
   const start = new Date(startDate).getTime();
   const end = new Date(endDate).getTime();
-  
+
   return Math.round((end - start) / 1000);
 }
 
@@ -132,7 +144,9 @@ export function formatDuration(durationSeconds: number | null): string {
   const remainingMinutes = minutes % 60;
 
   if (hours < 24) {
-    return remainingMinutes > 0 ? `${hours}h ${remainingMinutes}m` : `${hours}h`;
+    return remainingMinutes > 0
+      ? `${hours}h ${remainingMinutes}m`
+      : `${hours}h`;
   }
 
   const days = Math.floor(hours / 24);
@@ -200,7 +214,12 @@ export function isDAGRunActive(state: string): boolean {
  * Check if a task instance is currently active
  */
 export function isTaskInstanceActive(state: string | null): boolean {
-  return state === 'running' || state === 'queued' || state === 'up_for_retry' || state === 'up_for_reschedule';
+  return (
+    state === 'running' ||
+    state === 'queued' ||
+    state === 'up_for_retry' ||
+    state === 'up_for_reschedule'
+  );
 }
 
 /**
@@ -217,6 +236,8 @@ export function sortDAGRunsByDate(dagRuns: DAGRun[]): DAGRun[] {
 /**
  * Sort task instances by task_id alphabetically
  */
-export function sortTaskInstancesByName(taskInstances: TaskInstance[]): TaskInstance[] {
+export function sortTaskInstancesByName(
+  taskInstances: TaskInstance[]
+): TaskInstance[] {
   return [...taskInstances].sort((a, b) => a.task_id.localeCompare(b.task_id));
 }

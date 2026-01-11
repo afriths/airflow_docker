@@ -20,7 +20,7 @@ const USER_STORAGE_KEY = 'airflow_user';
 export class AuthService {
   private currentToken: AuthToken | null = null;
   private currentUser: User | null = null;
-  private refreshTimer: number | null = null;
+  private refreshTimer: NodeJS.Timeout | null = null;
 
   constructor() {
     this.initializeFromStorage();
@@ -38,7 +38,7 @@ export class AuthService {
 
       if (tokenData) {
         const token: AuthToken = JSON.parse(tokenData);
-        
+
         // Check if token is still valid
         if (token.expires_at > Date.now()) {
           this.currentToken = token;
@@ -76,7 +76,7 @@ export class AuthService {
     });
 
     // Handle storage changes from other tabs
-    window.addEventListener('storage', (event) => {
+    window.addEventListener('storage', event => {
       if (event.key === TOKEN_STORAGE_KEY) {
         if (event.newValue) {
           const token: AuthToken = JSON.parse(event.newValue);
@@ -97,8 +97,8 @@ export class AuthService {
     }
 
     // Refresh token 5 minutes before expiration
-    const refreshTime = token.expires_at - Date.now() - (5 * 60 * 1000);
-    
+    const refreshTime = token.expires_at - Date.now() - 5 * 60 * 1000;
+
     if (refreshTime > 0) {
       this.refreshTimer = setTimeout(() => {
         this.refreshToken();
@@ -111,7 +111,7 @@ export class AuthService {
    */
   private handleTokenExpiration(): void {
     console.warn('Authentication token expired');
-    
+
     // Try to refresh token if available
     if (this.currentToken?.refresh_token) {
       this.refreshToken();
@@ -128,7 +128,7 @@ export class AuthService {
   private storeAuth(token: AuthToken, user?: User): void {
     try {
       localStorage.setItem(TOKEN_STORAGE_KEY, JSON.stringify(token));
-      
+
       if (user) {
         localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(user));
       }
@@ -158,24 +158,27 @@ export class AuthService {
   /**
    * Login with username and password
    */
-  public async login(username: string, password: string): Promise<{ token: AuthToken; user: User }> {
+  public async login(
+    username: string,
+    password: string
+  ): Promise<{ token: AuthToken; user: User }> {
     try {
       // Note: Airflow's default auth might not have a dedicated login endpoint
       // This is a placeholder implementation that would need to be adapted
       // based on the actual Airflow authentication setup
-      
+
       // const loginData: LoginRequest = { username, password };
-      
+
       // For basic auth, we can create a token-like structure
       // In a real implementation, this would call the appropriate Airflow auth endpoint
       const basicAuthToken = btoa(`${username}:${password}`);
-      
+
       // Create a mock token structure for basic auth
       const token: AuthToken = {
         access_token: basicAuthToken,
         token_type: 'Basic',
         expires_in: 24 * 60 * 60, // 24 hours
-        expires_at: Date.now() + (24 * 60 * 60 * 1000),
+        expires_at: Date.now() + 24 * 60 * 60 * 1000,
       };
 
       // Create user object
@@ -218,7 +221,7 @@ export class AuthService {
       const newToken: AuthToken = {
         ...this.currentToken,
         expires_in: 24 * 60 * 60,
-        expires_at: Date.now() + (24 * 60 * 60 * 1000),
+        expires_at: Date.now() + 24 * 60 * 60 * 1000,
       };
 
       this.setToken(newToken);
@@ -259,7 +262,9 @@ export class AuthService {
    * Check if user is authenticated
    */
   public isAuthenticated(): boolean {
-    return this.currentToken !== null && this.currentToken.expires_at > Date.now();
+    return (
+      this.currentToken !== null && this.currentToken.expires_at > Date.now()
+    );
   }
 
   /**
@@ -291,7 +296,7 @@ export class AuthService {
    */
   public isTokenExpiringSoon(): boolean {
     const expirationTime = this.getTokenExpirationTime();
-    return expirationTime > 0 && expirationTime < (5 * 60 * 1000);
+    return expirationTime > 0 && expirationTime < 5 * 60 * 1000;
   }
 
   /**

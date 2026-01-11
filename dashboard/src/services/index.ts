@@ -13,7 +13,13 @@ export { AuthService, authService } from './authService';
 export * from './apiTransformers';
 
 // Configuration
-export { config, apiConfig, pollingConfig, cacheConfig, authConfig } from './config';
+export {
+  config,
+  apiConfig,
+  pollingConfig,
+  cacheConfig,
+  authConfig,
+} from './config';
 
 // Error Handling
 export * from './errorHandler';
@@ -31,7 +37,4 @@ export type {
   RetryConfig,
 } from '../types/api';
 
-export type {
-  AuthToken,
-  User,
-} from '../types/app';
+export type { AuthToken, User } from '../types/app';

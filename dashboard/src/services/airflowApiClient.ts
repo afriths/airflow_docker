@@ -3,7 +3,11 @@
  * Handles all communication with the Airflow REST API v2
  */
 
-import axios, { type AxiosInstance, type AxiosResponse, type AxiosError } from 'axios';
+import axios, {
+  type AxiosInstance,
+  type AxiosResponse,
+  type AxiosError,
+} from 'axios';
 import type {
   AirflowDAGCollection,
   AirflowDAGRunCollection,
@@ -46,7 +50,10 @@ const DEFAULT_RETRY_CONFIG: RetryConfig = {
   retryDelay: DEFAULT_CONFIG.retryDelay,
   retryCondition: (error: AxiosError) => {
     // Retry on network errors or 5xx server errors
-    return !error.response || (error.response.status >= 500 && error.response.status < 600);
+    return (
+      !error.response ||
+      (error.response.status >= 500 && error.response.status < 600)
+    );
   },
 };
 
@@ -82,21 +89,21 @@ export class AirflowAPIClient {
   private setupInterceptors(): void {
     // Request interceptor for adding auth token
     this.client.interceptors.request.use(
-      (config) => {
+      config => {
         if (this.authToken) {
           config.headers.Authorization = `Bearer ${this.authToken}`;
         }
         return config;
       },
-      (error) => Promise.reject(error)
+      error => Promise.reject(error)
     );
 
     // Response interceptor for error handling
     this.client.interceptors.response.use(
-      (response) => response,
+      response => response,
       async (error: AxiosError) => {
         const apiError = this.transformError(error);
-        
+
         // Handle token expiration
         if (error.response?.status === 401 && this.authToken) {
           this.authToken = null;
@@ -179,13 +186,16 @@ export class AirflowAPIClient {
         lastError = error as APIError;
 
         // Don't retry if it's the last attempt or retry condition is not met
-        if (attempt === config.maxRetries || !config.retryCondition?.(error as AxiosError)) {
+        if (
+          attempt === config.maxRetries ||
+          !config.retryCondition?.(error as AxiosError)
+        ) {
           break;
         }
 
         // Calculate exponential backoff delay
         const delay = config.retryDelay * Math.pow(2, attempt);
-        
+
         // Call retry callback if provided
         config.onRetry?.(attempt + 1, error);
 
@@ -200,7 +210,9 @@ export class AirflowAPIClient {
   /**
    * Build query parameters for API requests
    */
-  private buildQueryParams(params: Record<string, any>): Record<string, string> {
+  private buildQueryParams(
+    params: Record<string, any>
+  ): Record<string, string> {
     const queryParams: Record<string, string> = {};
 
     Object.entries(params).forEach(([key, value]) => {
@@ -221,7 +233,9 @@ export class AirflowAPIClient {
   /**
    * Get all DAGs with optional filtering and pagination
    */
-  public async getDAGs(params: Partial<GetDAGsParams> = {}): Promise<APIResponse<AirflowDAGCollection>> {
+  public async getDAGs(
+    params: Partial<GetDAGsParams> = {}
+  ): Promise<APIResponse<AirflowDAGCollection>> {
     const queryParams = this.buildQueryParams({
       limit: params.limit ?? 100,
       offset: params.offset ?? 0,
@@ -248,9 +262,11 @@ export class AirflowAPIClient {
   /**
    * Trigger a DAG run
    */
-  public async triggerDAG(request: TriggerDAGRequest): Promise<APIResponse<AirflowDAGRunResponse>> {
+  public async triggerDAG(
+    request: TriggerDAGRequest
+  ): Promise<APIResponse<AirflowDAGRunResponse>> {
     const { dag_id, ...payload } = request;
-    
+
     return this.executeWithRetry(() =>
       this.client.post<AirflowDAGRunResponse>(
         `/dags/${encodeURIComponent(dag_id)}/dagRuns`,
@@ -262,7 +278,10 @@ export class AirflowAPIClient {
   /**
    * Pause/Unpause a DAG
    */
-  public async updateDAG(dagId: string, isPaused: boolean): Promise<APIResponse<AirflowDAGResponse>> {
+  public async updateDAG(
+    dagId: string,
+    isPaused: boolean
+  ): Promise<APIResponse<AirflowDAGResponse>> {
     return this.executeWithRetry(() =>
       this.client.patch<AirflowDAGResponse>(
         `/dags/${encodeURIComponent(dagId)}`,
@@ -274,14 +293,18 @@ export class AirflowAPIClient {
   /**
    * Pause a DAG
    */
-  public async pauseDAG(dagId: string): Promise<APIResponse<AirflowDAGResponse>> {
+  public async pauseDAG(
+    dagId: string
+  ): Promise<APIResponse<AirflowDAGResponse>> {
     return this.updateDAG(dagId, true);
   }
 
   /**
    * Unpause a DAG
    */
-  public async unpauseDAG(dagId: string): Promise<APIResponse<AirflowDAGResponse>> {
+  public async unpauseDAG(
+    dagId: string
+  ): Promise<APIResponse<AirflowDAGResponse>> {
     return this.updateDAG(dagId, false);
   }
 
@@ -290,7 +313,9 @@ export class AirflowAPIClient {
   /**
    * Get DAG runs for a specific DAG
    */
-  public async getDAGRuns(params: GetDAGRunsParams): Promise<APIResponse<AirflowDAGRunCollection>> {
+  public async getDAGRuns(
+    params: GetDAGRunsParams
+  ): Promise<APIResponse<AirflowDAGRunCollection>> {
     const { dag_id, ...queryParams } = params;
     const formattedParams = this.buildQueryParams({
       limit: queryParams.limit ?? 25,
@@ -317,7 +342,10 @@ export class AirflowAPIClient {
   /**
    * Get a specific DAG run
    */
-  public async getDAGRun(dagId: string, dagRunId: string): Promise<APIResponse<AirflowDAGRunResponse>> {
+  public async getDAGRun(
+    dagId: string,
+    dagRunId: string
+  ): Promise<APIResponse<AirflowDAGRunResponse>> {
     return this.executeWithRetry(() =>
       this.client.get<AirflowDAGRunResponse>(
         `/dags/${encodeURIComponent(dagId)}/dagRuns/${encodeURIComponent(dagRunId)}`
@@ -328,7 +356,10 @@ export class AirflowAPIClient {
   /**
    * Delete a DAG run
    */
-  public async deleteDAGRun(dagId: string, dagRunId: string): Promise<APIResponse<void>> {
+  public async deleteDAGRun(
+    dagId: string,
+    dagRunId: string
+  ): Promise<APIResponse<void>> {
     return this.executeWithRetry(() =>
       this.client.delete<void>(
         `/dags/${encodeURIComponent(dagId)}/dagRuns/${encodeURIComponent(dagRunId)}`
@@ -341,7 +372,9 @@ export class AirflowAPIClient {
   /**
    * Get task instances for a specific DAG run
    */
-  public async getTaskInstances(params: GetTaskInstancesParams): Promise<APIResponse<AirflowTaskInstanceCollection>> {
+  public async getTaskInstances(
+    params: GetTaskInstancesParams
+  ): Promise<APIResponse<AirflowTaskInstanceCollection>> {
     const { dag_id, dag_run_id, ...queryParams } = params;
     const formattedParams = this.buildQueryParams({
       limit: queryParams.limit ?? 100,
@@ -385,8 +418,11 @@ export class AirflowAPIClient {
   /**
    * Get task logs
    */
-  public async getTaskLogs(params: GetTaskLogsParams): Promise<APIResponse<{ content: string }>> {
-    const { dag_id, dag_run_id, task_id, task_try_number, ...queryParams } = params;
+  public async getTaskLogs(
+    params: GetTaskLogsParams
+  ): Promise<APIResponse<{ content: string }>> {
+    const { dag_id, dag_run_id, task_id, task_try_number, ...queryParams } =
+      params;
     const formattedParams = this.buildQueryParams({
       full_content: queryParams.full_content || true,
       map_index: queryParams.map_index,
@@ -404,7 +440,11 @@ export class AirflowAPIClient {
   /**
    * Clear a task instance (set state to None)
    */
-  public async clearTaskInstance(dagId: string, dagRunId: string, taskId: string): Promise<APIResponse<void>> {
+  public async clearTaskInstance(
+    dagId: string,
+    dagRunId: string,
+    taskId: string
+  ): Promise<APIResponse<void>> {
     return this.executeWithRetry(() =>
       this.client.post<void>(
         `/dags/${encodeURIComponent(dagId)}/clearTaskInstances`,
@@ -422,7 +462,11 @@ export class AirflowAPIClient {
   /**
    * Mark task instance as success
    */
-  public async markTaskSuccess(dagId: string, dagRunId: string, taskId: string): Promise<APIResponse<void>> {
+  public async markTaskSuccess(
+    dagId: string,
+    dagRunId: string,
+    taskId: string
+  ): Promise<APIResponse<void>> {
     return this.executeWithRetry(() =>
       this.client.patch<void>(
         `/dags/${encodeURIComponent(dagId)}/dagRuns/${encodeURIComponent(dagRunId)}/taskInstances/${encodeURIComponent(taskId)}`,
@@ -434,7 +478,11 @@ export class AirflowAPIClient {
   /**
    * Mark task instance as failed
    */
-  public async markTaskFailed(dagId: string, dagRunId: string, taskId: string): Promise<APIResponse<void>> {
+  public async markTaskFailed(
+    dagId: string,
+    dagRunId: string,
+    taskId: string
+  ): Promise<APIResponse<void>> {
     return this.executeWithRetry(() =>
       this.client.patch<void>(
         `/dags/${encodeURIComponent(dagId)}/dagRuns/${encodeURIComponent(dagRunId)}/taskInstances/${encodeURIComponent(taskId)}`,

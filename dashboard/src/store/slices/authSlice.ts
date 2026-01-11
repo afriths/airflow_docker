@@ -3,7 +3,11 @@
  * Manages user authentication state and actions
  */
 
-import { createSlice, createAsyncThunk, type PayloadAction } from '@reduxjs/toolkit';
+import {
+  createSlice,
+  createAsyncThunk,
+  type PayloadAction,
+} from '@reduxjs/toolkit';
 import type { AuthState, LoginPayload } from '../../types/store';
 import type { User, AuthToken } from '../../types/app';
 import { authService } from '../../services';
@@ -22,7 +26,10 @@ export const loginUser = createAsyncThunk(
   'auth/login',
   async (payload: LoginPayload, { rejectWithValue }) => {
     try {
-      const response = await authService.login(payload.username, payload.password);
+      const response = await authService.login(
+        payload.username,
+        payload.password
+      );
       return response;
     } catch (error: any) {
       return rejectWithValue(error.message || 'Login failed');
@@ -64,7 +71,7 @@ const authSlice = createSlice({
   initialState,
   reducers: {
     // Clear authentication error
-    clearAuthError: (state) => {
+    clearAuthError: state => {
       state.error = null;
     },
     // Set authentication token (for manual token setting)
@@ -78,7 +85,7 @@ const authSlice = createSlice({
       state.user = action.payload;
     },
     // Reset authentication state
-    resetAuth: (state) => {
+    resetAuth: state => {
       state.token = null;
       state.user = null;
       state.isAuthenticated = false;
@@ -86,10 +93,10 @@ const authSlice = createSlice({
       state.error = null;
     },
   },
-  extraReducers: (builder) => {
+  extraReducers: builder => {
     // Login user
     builder
-      .addCase(loginUser.pending, (state) => {
+      .addCase(loginUser.pending, state => {
         state.loading = true;
         state.error = null;
       })
@@ -110,7 +117,7 @@ const authSlice = createSlice({
 
     // Refresh token
     builder
-      .addCase(refreshToken.pending, (state) => {
+      .addCase(refreshToken.pending, state => {
         state.loading = true;
       })
       .addCase(refreshToken.fulfilled, (state, action) => {
@@ -130,10 +137,10 @@ const authSlice = createSlice({
 
     // Logout user
     builder
-      .addCase(logoutUser.pending, (state) => {
+      .addCase(logoutUser.pending, state => {
         state.loading = true;
       })
-      .addCase(logoutUser.fulfilled, (state) => {
+      .addCase(logoutUser.fulfilled, state => {
         state.loading = false;
         state.token = null;
         state.user = null;
@@ -148,7 +155,8 @@ const authSlice = createSlice({
 });
 
 // Export actions
-export const { clearAuthError, setAuthToken, setUser, resetAuth } = authSlice.actions;
+export const { clearAuthError, setAuthToken, setUser, resetAuth } =
+  authSlice.actions;
 
 // Export reducer
 export default authSlice.reducer;

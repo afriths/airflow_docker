@@ -4,28 +4,24 @@
  */
 
 // Core Airflow entities
-export type TaskState = 
-  | 'success' 
-  | 'failed' 
-  | 'running' 
-  | 'queued' 
-  | 'skipped' 
-  | 'up_for_retry' 
-  | 'up_for_reschedule' 
-  | 'upstream_failed' 
-  | 'deferred' 
+export type TaskState =
+  | 'success'
+  | 'failed'
+  | 'running'
+  | 'queued'
+  | 'skipped'
+  | 'up_for_retry'
+  | 'up_for_reschedule'
+  | 'upstream_failed'
+  | 'deferred'
   | 'removed';
 
-export type DAGRunState = 
-  | 'success' 
-  | 'failed' 
-  | 'running' 
-  | 'queued';
+export type DAGRunState = 'success' | 'failed' | 'running' | 'queued';
 
-export type DAGRunType = 
-  | 'manual' 
-  | 'scheduled' 
-  | 'dataset_triggered' 
+export type DAGRunType =
+  | 'manual'
+  | 'scheduled'
+  | 'dataset_triggered'
   | 'backfill';
 
 // Schedule interval types

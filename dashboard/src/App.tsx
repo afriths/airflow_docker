@@ -1,62 +1,91 @@
-import { useEffect } from 'react';
-import { useAppDispatch, useAppSelector } from './store';
-import { fetchDAGs } from './store/slices/dagsSlice';
-import { selectDAGsList, selectDAGsLoading, selectDAGsError } from './store/selectors';
+import React from 'react';
+import { ThemeProvider, createTheme } from '@mui/material/styles';
+import { CssBaseline, Box, AppBar, Toolbar, Typography } from '@mui/material';
+import { AuthProvider, ProtectedRoute, LogoutButton } from './components';
+import { useAuth } from './hooks';
 import './App.css';
 
-function App() {
-  const dispatch = useAppDispatch();
-  const dags = useAppSelector(selectDAGsList);
-  const loading = useAppSelector(selectDAGsLoading);
-  const error = useAppSelector(selectDAGsError);
+// Create Material-UI theme
+const theme = createTheme({
+  palette: {
+    mode: 'light',
+    primary: {
+      main: '#1976d2',
+    },
+    secondary: {
+      main: '#dc004e',
+    },
+  },
+});
 
-  useEffect(() => {
-    // Test Redux store by dispatching an action
-    console.log('Redux store initialized successfully');
-    console.log('DAGs state:', { dags, loading, error });
-  }, [dags, loading, error]);
-
-  const handleFetchDAGs = () => {
-    dispatch(fetchDAGs({}));
-  };
+// Main dashboard content (protected)
+const DashboardContent: React.FC = () => {
+  const { user } = useAuth();
 
   return (
-    <div style={{ padding: '20px' }}>
-      <h1>Airflow Dashboard - Redux Store Test</h1>
-      
-      <div style={{ marginBottom: '20px' }}>
-        <button onClick={handleFetchDAGs} disabled={loading}>
-          {loading ? 'Loading...' : 'Fetch DAGs'}
-        </button>
-      </div>
+    <Box sx={{ flexGrow: 1 }}>
+      <AppBar position="static">
+        <Toolbar>
+          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+            Airflow Dashboard
+          </Typography>
+          <Typography variant="body2" sx={{ mr: 2 }}>
+            Welcome, {user?.username}
+          </Typography>
+          <LogoutButton variant="icon" />
+        </Toolbar>
+      </AppBar>
 
-      {error && (
-        <div style={{ color: 'red', marginBottom: '20px' }}>
-          Error: {error}
-        </div>
-      )}
+      <Box sx={{ p: 3 }}>
+        <Typography variant="h4" gutterBottom>
+          Welcome to Airflow Dashboard
+        </Typography>
 
-      <div>
-        <h3>Redux Store Status:</h3>
-        <ul>
-          <li>DAGs count: {dags.length}</li>
-          <li>Loading: {loading ? 'Yes' : 'No'}</li>
-          <li>Error: {error || 'None'}</li>
-        </ul>
-      </div>
+        <Typography variant="body1" paragraph>
+          You are successfully authenticated and can now access the dashboard
+          features.
+        </Typography>
 
-      <div>
-        <h3>Store Configuration:</h3>
-        <p>✅ Redux Toolkit store configured</p>
-        <p>✅ Auth slice implemented</p>
-        <p>✅ DAGs slice implemented</p>
-        <p>✅ DAG Runs slice implemented</p>
-        <p>✅ Tasks slice implemented</p>
-        <p>✅ UI slice implemented</p>
-        <p>✅ Selectors implemented</p>
-        <p>✅ Redux DevTools enabled</p>
-      </div>
-    </div>
+        <Box sx={{ mt: 3 }}>
+          <Typography variant="h6" gutterBottom>
+            Authentication System Status:
+          </Typography>
+          <ul>
+            <li>✅ Login component with form validation</li>
+            <li>✅ Authentication service with token storage</li>
+            <li>✅ Protected route wrapper component</li>
+            <li>✅ Automatic token refresh logic</li>
+            <li>✅ Logout functionality</li>
+            <li>✅ Authentication hooks</li>
+            <li>✅ Multi-tab session synchronization</li>
+          </ul>
+        </Box>
+
+        <Box sx={{ mt: 3 }}>
+          <Typography variant="h6" gutterBottom>
+            User Information:
+          </Typography>
+          <ul>
+            <li>Username: {user?.username}</li>
+            <li>Roles: {user?.roles?.join(', ') || 'None'}</li>
+            <li>Email: {user?.email || 'Not provided'}</li>
+          </ul>
+        </Box>
+      </Box>
+    </Box>
+  );
+};
+
+function App() {
+  return (
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <AuthProvider>
+        <ProtectedRoute>
+          <DashboardContent />
+        </ProtectedRoute>
+      </AuthProvider>
+    </ThemeProvider>
   );
 }
 

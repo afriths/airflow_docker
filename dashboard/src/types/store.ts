@@ -3,7 +3,14 @@
  * Defines the structure of the application state
  */
 
-import type { DAG, DAGRun, TaskInstance, User, AuthToken, Notification } from './app';
+import type {
+  DAG,
+  DAGRun,
+  TaskInstance,
+  User,
+  AuthToken,
+  Notification,
+} from './app';
 
 // Authentication state
 export interface AuthState {
@@ -36,7 +43,8 @@ export interface DAGRunsState {
 
 // Task Instances state - organized by DAG ID and Run ID
 export interface TasksState {
-  [dagRunKey: string]: { // format: "dagId:runId"
+  [dagRunKey: string]: {
+    // format: "dagId:runId"
     instances: TaskInstance[];
     loading: boolean;
     error: string | null;

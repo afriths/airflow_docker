@@ -4,7 +4,11 @@
  */
 
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
-import type { UIState, AddNotificationPayload, RemoveNotificationPayload } from '../../types/store';
+import type {
+  UIState,
+  AddNotificationPayload,
+  RemoveNotificationPayload,
+} from '../../types/store';
 import type { Notification } from '../../types/app';
 
 // Initial state
@@ -22,7 +26,7 @@ const uiSlice = createSlice({
   initialState,
   reducers: {
     // Toggle sidebar
-    toggleSidebar: (state) => {
+    toggleSidebar: state => {
       state.sidebarOpen = !state.sidebarOpen;
     },
     // Set sidebar state
@@ -43,13 +47,16 @@ const uiSlice = createSlice({
       state.notifications.push(notification);
     },
     // Remove notification
-    removeNotification: (state, action: PayloadAction<RemoveNotificationPayload>) => {
+    removeNotification: (
+      state,
+      action: PayloadAction<RemoveNotificationPayload>
+    ) => {
       state.notifications = state.notifications.filter(
         notification => notification.id !== action.payload.id
       );
     },
     // Clear all notifications
-    clearAllNotifications: (state) => {
+    clearAllNotifications: state => {
       state.notifications = [];
     },
     // Set theme
@@ -57,7 +64,7 @@ const uiSlice = createSlice({
       state.theme = action.payload;
     },
     // Toggle theme
-    toggleTheme: (state) => {
+    toggleTheme: state => {
       state.theme = state.theme === 'light' ? 'dark' : 'light';
     },
     // Set refresh interval
@@ -65,7 +72,7 @@ const uiSlice = createSlice({
       state.refreshInterval = action.payload;
     },
     // Toggle auto refresh
-    toggleAutoRefresh: (state) => {
+    toggleAutoRefresh: state => {
       state.autoRefresh = !state.autoRefresh;
     },
     // Set auto refresh

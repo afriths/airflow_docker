@@ -4,7 +4,11 @@
  */
 
 import { configureStore } from '@reduxjs/toolkit';
-import { type TypedUseSelectorHook, useDispatch, useSelector } from 'react-redux';
+import {
+  type TypedUseSelectorHook,
+  useDispatch,
+  useSelector,
+} from 'react-redux';
 
 import authSlice from './slices/authSlice';
 import dagsSlice from './slices/dagsSlice';
@@ -23,7 +27,7 @@ export const store = configureStore({
     tasks: tasksSlice,
     ui: uiSlice,
   },
-  middleware: (getDefaultMiddleware) =>
+  middleware: getDefaultMiddleware =>
     getDefaultMiddleware({
       serializableCheck: {
         // Ignore these action types for serializable check

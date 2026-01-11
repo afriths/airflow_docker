@@ -4,7 +4,13 @@
  */
 
 import React from 'react';
-import type { DAG, DAGRun, TaskInstance, Notification, PaginationInfo } from './app';
+import type {
+  DAG,
+  DAGRun,
+  TaskInstance,
+  Notification,
+  PaginationInfo,
+} from './app';
 
 // Layout components
 export interface DashboardLayoutProps {
