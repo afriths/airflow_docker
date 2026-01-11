@@ -15,6 +15,7 @@ import {
 import type { DashboardLayoutProps } from '../../types/components';
 import DashboardHeader from './DashboardHeader';
 import DashboardSidebar from './DashboardSidebar';
+import NotificationList from '../NotificationList';
 
 const DRAWER_WIDTH = 280;
 
@@ -114,6 +115,9 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
           {children}
         </Box>
       </Box>
+
+      {/* Notification List */}
+      <NotificationList />
     </Box>
   );
 };

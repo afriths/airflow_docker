@@ -16,5 +16,9 @@ export { default as DashboardSidebar } from './layout/DashboardSidebar';
 
 // DAG Components
 export { default as DAGList } from './DAGList';
+export { default as DAGTriggerDialog } from './DAGTriggerDialog';
+
+// Notification Components
+export { default as NotificationList } from './NotificationList';
 
 // Component types are available through the component imports

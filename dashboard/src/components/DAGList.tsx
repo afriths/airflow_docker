@@ -42,6 +42,8 @@ import {
   pauseDAG,
   unpauseDAG,
 } from '../store/slices/dagsSlice';
+import { addNotification } from '../store/slices/uiSlice';
+import DAGTriggerDialog from './DAGTriggerDialog';
 import type { DAG, DAGFilters } from '../types/app';
 
 interface DAGListProps {
@@ -66,6 +68,11 @@ const DAGList: React.FC<DAGListProps> = ({ onDAGSelect, selectedDAGId }) => {
   const [pausedFilter, setPausedFilter] = useState<string>('all');
   const [currentPage, setCurrentPage] = useState(1);
   const [triggeringDAGs, setTriggeringDAGs] = useState<Set<string>>(new Set());
+  
+  // Trigger dialog state
+  const [triggerDialogOpen, setTriggerDialogOpen] = useState(false);
+  const [selectedDAGForTrigger, setSelectedDAGForTrigger] = useState<DAG | null>(null);
+  const [triggerError, setTriggerError] = useState<string | null>(null);
 
   // Fetch DAGs on component mount and when filters change
   useEffect(() => {
@@ -131,13 +138,46 @@ const DAGList: React.FC<DAGListProps> = ({ onDAGSelect, selectedDAGId }) => {
     dispatch(fetchDAGs(filters));
   };
 
-  // Handle DAG trigger
-  const handleTriggerDAG = async (dagId: string) => {
+  // Handle DAG trigger - open confirmation dialog
+  const handleTriggerDAG = (dag: DAG) => {
+    setSelectedDAGForTrigger(dag);
+    setTriggerError(null);
+    setTriggerDialogOpen(true);
+  };
+
+  // Handle trigger confirmation from dialog
+  const handleTriggerConfirm = async (dagId: string, config?: object) => {
     setTriggeringDAGs(prev => new Set(prev).add(dagId));
+    setTriggerError(null);
+    
     try {
-      await dispatch(triggerDAG({ dagId })).unwrap();
-    } catch (error) {
-      console.error('Failed to trigger DAG:', error);
+      await dispatch(triggerDAG({ dagId, conf: config })).unwrap();
+      
+      // Show success notification
+      dispatch(addNotification({
+        type: 'success',
+        title: 'DAG Triggered Successfully',
+        message: `DAG "${dagId}" has been triggered successfully.`,
+        autoHide: true,
+        duration: 5000,
+      }));
+      
+      // Close dialog
+      setTriggerDialogOpen(false);
+      setSelectedDAGForTrigger(null);
+      
+    } catch (error: any) {
+      const errorMessage = error.message || 'Failed to trigger DAG';
+      setTriggerError(errorMessage);
+      
+      // Show error notification
+      dispatch(addNotification({
+        type: 'error',
+        title: 'DAG Trigger Failed',
+        message: `Failed to trigger DAG "${dagId}": ${errorMessage}`,
+        autoHide: true,
+        duration: 8000,
+      }));
     } finally {
       setTriggeringDAGs(prev => {
         const newSet = new Set(prev);
@@ -147,16 +187,47 @@ const DAGList: React.FC<DAGListProps> = ({ onDAGSelect, selectedDAGId }) => {
     }
   };
 
+  // Handle trigger dialog close
+  const handleTriggerDialogClose = () => {
+    if (!triggeringDAGs.has(selectedDAGForTrigger?.dag_id || '')) {
+      setTriggerDialogOpen(false);
+      setSelectedDAGForTrigger(null);
+      setTriggerError(null);
+    }
+  };
+
   // Handle DAG pause/unpause
   const handleTogglePause = async (dag: DAG) => {
     try {
       if (dag.is_paused) {
         await dispatch(unpauseDAG(dag.dag_id)).unwrap();
+        dispatch(addNotification({
+          type: 'success',
+          title: 'DAG Unpaused',
+          message: `DAG "${dag.dag_id}" has been unpaused successfully.`,
+          autoHide: true,
+          duration: 4000,
+        }));
       } else {
         await dispatch(pauseDAG(dag.dag_id)).unwrap();
+        dispatch(addNotification({
+          type: 'success',
+          title: 'DAG Paused',
+          message: `DAG "${dag.dag_id}" has been paused successfully.`,
+          autoHide: true,
+          duration: 4000,
+        }));
       }
-    } catch (error) {
-      console.error('Failed to toggle DAG pause state:', error);
+    } catch (error: any) {
+      const action = dag.is_paused ? 'unpause' : 'pause';
+      const errorMessage = error.message || `Failed to ${action} DAG`;
+      dispatch(addNotification({
+        type: 'error',
+        title: `Failed to ${action.charAt(0).toUpperCase() + action.slice(1)} DAG`,
+        message: `Failed to ${action} DAG "${dag.dag_id}": ${errorMessage}`,
+        autoHide: true,
+        duration: 6000,
+      }));
     }
   };
 
@@ -310,7 +381,6 @@ const DAGList: React.FC<DAGListProps> = ({ onDAGSelect, selectedDAGId }) => {
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
         {paginatedDAGs.map(dag => {
           const statusDisplay = getStatusDisplay(dag);
-          const isTriggering = triggeringDAGs.has(dag.dag_id);
           const isSelected = selectedDAGId === dag.dag_id;
 
           return (
@@ -475,21 +545,15 @@ const DAGList: React.FC<DAGListProps> = ({ onDAGSelect, selectedDAGId }) => {
                       <Button
                         variant="contained"
                         size="small"
-                        startIcon={
-                          isTriggering ? (
-                            <CircularProgress size={16} />
-                          ) : (
-                            <PlayIcon />
-                          )
-                        }
+                        startIcon={<PlayIcon />}
                         onClick={e => {
                           e.stopPropagation();
-                          handleTriggerDAG(dag.dag_id);
+                          handleTriggerDAG(dag);
                         }}
-                        disabled={isTriggering || dag.has_import_errors}
+                        disabled={dag.has_import_errors}
                         sx={{ minWidth: 90 }}
                       >
-                        {isTriggering ? 'Triggering...' : 'Trigger'}
+                        Trigger
                       </Button>
 
                       <Button
@@ -535,6 +599,16 @@ const DAGList: React.FC<DAGListProps> = ({ onDAGSelect, selectedDAGId }) => {
             ` (filtered from ${dags.length} total)`}
         </Typography>
       </Box>
+
+      {/* DAG Trigger Confirmation Dialog */}
+      <DAGTriggerDialog
+        open={triggerDialogOpen}
+        dag={selectedDAGForTrigger}
+        loading={selectedDAGForTrigger ? triggeringDAGs.has(selectedDAGForTrigger.dag_id) : false}
+        error={triggerError}
+        onClose={handleTriggerDialogClose}
+        onConfirm={handleTriggerConfirm}
+      />
     </Box>
   );
 };
