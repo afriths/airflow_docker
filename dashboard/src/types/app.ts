@@ -122,16 +122,31 @@ export interface DAGFilters {
 }
 
 export interface DAGRunFilters {
+  limit?: number;
+  offset?: number;
   state?: DAGRunState[];
   run_type?: DAGRunType[];
   start_date_gte?: string;
   start_date_lte?: string;
   execution_date_gte?: string;
   execution_date_lte?: string;
+  end_date_gte?: string;
+  end_date_lte?: string;
+  order_by?: string;
 }
 
 export interface TaskInstanceFilters {
+  limit?: number;
+  offset?: number;
   state?: TaskState[];
   pool?: string[];
   queue?: string[];
+  execution_date_gte?: string;
+  execution_date_lte?: string;
+  start_date_gte?: string;
+  start_date_lte?: string;
+  end_date_gte?: string;
+  end_date_lte?: string;
+  duration_gte?: number;
+  duration_lte?: number;
 }
