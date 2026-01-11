@@ -15,7 +15,8 @@ import {
 import type { DashboardLayoutProps } from '../../types/components';
 import DashboardHeader from './DashboardHeader';
 import DashboardSidebar from './DashboardSidebar';
-import NotificationList from '../NotificationList';
+import { OfflineIndicator, LoadingSpinner } from '../';
+import { useOfflineSupport } from '../../hooks';
 
 const DRAWER_WIDTH = 280;
 
@@ -23,10 +24,21 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   children,
   title,
   actions,
+  loading = false,
 }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [sidebarOpen, setSidebarOpen] = useState(!isMobile);
+  
+  const { 
+    isOnline, 
+    lastOnline, 
+    cachedDataCount, 
+    retryConnection 
+  } = useOfflineSupport({
+    enableNotifications: true,
+    enableCaching: true,
+  });
 
   const handleSidebarToggle = () => {
     setSidebarOpen(!sidebarOpen);
@@ -65,6 +77,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
           actions={actions}
           onMenuClick={handleSidebarToggle}
           showMenuButton={isMobile || !sidebarOpen}
+          isOnline={isOnline}
         />
       </AppBar>
 
@@ -99,10 +112,20 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
             duration: theme.transitions.duration.leavingScreen,
           }),
           marginLeft: isMobile ? 0 : sidebarOpen ? 0 : `-${DRAWER_WIDTH}px`,
+          position: 'relative',
         }}
       >
         {/* Toolbar spacer */}
         <Toolbar />
+
+        {/* Offline Indicator */}
+        <OfflineIndicator
+          isOnline={isOnline}
+          lastUpdated={lastOnline}
+          cachedDataCount={cachedDataCount}
+          onRetry={retryConnection}
+          showDetails={true}
+        />
 
         {/* Page content */}
         <Box
@@ -110,14 +133,19 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
             p: 3,
             minHeight: 'calc(100vh - 64px)', // Account for toolbar height
             backgroundColor: theme.palette.grey[50],
+            position: 'relative',
           }}
         >
+          {loading && (
+            <LoadingSpinner
+              overlay={true}
+              message="Loading..."
+              size="large"
+            />
+          )}
           {children}
         </Box>
       </Box>
-
-      {/* Notification List */}
-      <NotificationList />
     </Box>
   );
 };

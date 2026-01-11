@@ -1,6 +1,6 @@
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { CssBaseline } from '@mui/material';
-import { AuthProvider, ProtectedRoute } from './components';
+import { AuthProvider, ProtectedRoute, ErrorBoundary, NotificationList } from './components';
 import { AppRouter } from './router';
 import './App.css';
 
@@ -36,14 +36,17 @@ const theme = createTheme({
 
 function App() {
   return (
-    <ThemeProvider theme={theme}>
-      <CssBaseline />
-      <AuthProvider>
-        <ProtectedRoute>
-          <AppRouter />
-        </ProtectedRoute>
-      </AuthProvider>
-    </ThemeProvider>
+    <ErrorBoundary>
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+        <AuthProvider>
+          <ProtectedRoute>
+            <AppRouter />
+            <NotificationList />
+          </ProtectedRoute>
+        </AuthProvider>
+      </ThemeProvider>
+    </ErrorBoundary>
   );
 }
 

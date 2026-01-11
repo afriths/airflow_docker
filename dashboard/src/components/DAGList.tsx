@@ -1,7 +1,7 @@
 /**
  * DAG List Component
  * Displays a list of DAGs with search, filtering, and pagination capabilities
- * Now uses React Query for real-time updates
+ * Enhanced with error handling and skeleton loading
  */
 
 import React, { useState, useMemo } from 'react';
@@ -21,8 +21,6 @@ import {
   Select,
   MenuItem,
   Tooltip,
-  CircularProgress,
-  Alert,
   Stack,
   Divider,
 } from '@mui/material';
@@ -32,9 +30,7 @@ import {
   PlayArrow as PlayIcon,
   Pause as PauseIcon,
   Error as ErrorIcon,
-  CheckCircle as SuccessIcon,
   RadioButtonUnchecked as IdleIcon,
-  AccessTime as RunningIcon,
 } from '@mui/icons-material';
 import { 
   useDAGsQuery, 
@@ -42,18 +38,35 @@ import {
   useUpdateDAGMutation, 
   useRefreshDAGs 
 } from '../hooks';
-import { RealTimeStatusIndicator } from './';
+import { 
+  RealTimeStatusIndicator, 
+  ErrorDisplay, 
+  DAGListSkeleton,
+  LoadingSpinner 
+} from './';
 import DAGTriggerDialog from './DAGTriggerDialog';
+import { enhanceError } from '../services/errorHandler';
 import type { DAG, DAGFilters } from '../types/app';
 
 interface DAGListProps {
   onDAGSelect?: (dagId: string) => void;
   selectedDAGId?: string | null;
+  dags?: DAG[];
+  loading?: boolean;
+  error?: any;
+  onRefresh?: () => void;
 }
 
 const ITEMS_PER_PAGE = 10;
 
-const DAGList: React.FC<DAGListProps> = ({ onDAGSelect, selectedDAGId }) => {
+const DAGList: React.FC<DAGListProps> = ({ 
+  onDAGSelect, 
+  selectedDAGId,
+  dags: propDags,
+  loading: propLoading,
+  error: propError,
+  onRefresh: propOnRefresh,
+}) => {
   // Local state for filtering and pagination
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
@@ -72,20 +85,19 @@ const DAGList: React.FC<DAGListProps> = ({ onDAGSelect, selectedDAGId }) => {
     return result;
   }, [searchTerm, pausedFilter]);
 
-  // React Query hooks
-  const { 
-    data: dagCollection, 
-    isLoading, 
-    error, 
-    isFetching,
-    dataUpdatedAt 
-  } = useDAGsQuery(filters);
+  // React Query hooks (only use if props not provided)
+  const queryResult = useDAGsQuery(filters, { enabled: !propDags });
+  const { refreshList } = useRefreshDAGs();
+
+  // Use props if provided, otherwise use query results
+  const dags = propDags || queryResult.data?.dags || [];
+  const isLoading = propLoading ?? queryResult.isLoading;
+  const error = propError ?? queryResult.error;
+  const isFetching = queryResult.isFetching;
+  const dataUpdatedAt = queryResult.dataUpdatedAt;
 
   const triggerDAGMutation = useTriggerDAGMutation();
   const updateDAGMutation = useUpdateDAGMutation();
-  const { refreshList } = useRefreshDAGs();
-
-  const dags = dagCollection?.dags || [];
 
   // Filter and paginate DAGs
   const filteredDAGs = useMemo(() => {
@@ -107,8 +119,7 @@ const DAGList: React.FC<DAGListProps> = ({ onDAGSelect, selectedDAGId }) => {
     // Apply status filter
     if (statusFilter !== 'all') {
       filtered = filtered.filter(dag => {
-        // Transform Airflow API response to match our DAG type
-        const lastRunState = dag.next_dagrun ? 'scheduled' : null; // Simplified logic
+        const lastRunState = dag.last_run_state;
         
         switch (statusFilter) {
           case 'success':
@@ -138,7 +149,11 @@ const DAGList: React.FC<DAGListProps> = ({ onDAGSelect, selectedDAGId }) => {
 
   // Handle refresh
   const handleRefresh = () => {
-    refreshList(filters);
+    if (propOnRefresh) {
+      propOnRefresh();
+    } else {
+      refreshList(filters);
+    }
   };
 
   // Handle DAG trigger - open confirmation dialog
@@ -178,8 +193,8 @@ const DAGList: React.FC<DAGListProps> = ({ onDAGSelect, selectedDAGId }) => {
     }
   };
 
-  // Get status icon and color - simplified for Airflow API response
-  const getStatusDisplay = (dag: any) => {
+  // Get status icon and color
+  const getStatusDisplay = (dag: DAG) => {
     if (dag.has_import_errors) {
       return {
         icon: <ErrorIcon />,
@@ -188,7 +203,6 @@ const DAGList: React.FC<DAGListProps> = ({ onDAGSelect, selectedDAGId }) => {
       };
     }
 
-    // Simplified status logic - in real implementation, you'd need to fetch recent DAG runs
     return {
       icon: <IdleIcon />,
       color: 'default' as const,
@@ -279,21 +293,22 @@ const DAGList: React.FC<DAGListProps> = ({ onDAGSelect, selectedDAGId }) => {
       </Box>
 
       {/* Error display */}
-      {error && (
-        <Alert severity="error" sx={{ mb: 2 }}>
-          {error.message || 'Failed to load DAGs'}
-        </Alert>
+      {error && !isLoading && (
+        <ErrorDisplay
+          error={enhanceError(error)}
+          onRetry={handleRefresh}
+          showDetails={false}
+          variant="alert"
+        />
       )}
 
-      {/* Loading state */}
+      {/* Loading state with skeleton */}
       {isLoading && dags.length === 0 && (
-        <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
-          <CircularProgress />
-        </Box>
+        <DAGListSkeleton count={6} />
       )}
 
-      {/* DAG list */}
-      {!isLoading && paginatedDAGs.length === 0 && (
+      {/* Empty state */}
+      {!isLoading && !error && paginatedDAGs.length === 0 && (
         <Box sx={{ textAlign: 'center', py: 4 }}>
           <Typography variant="h6" color="text.secondary">
             No DAGs found
@@ -306,28 +321,38 @@ const DAGList: React.FC<DAGListProps> = ({ onDAGSelect, selectedDAGId }) => {
         </Box>
       )}
 
-      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-        {paginatedDAGs.map(dag => {
-          const statusDisplay = getStatusDisplay(dag);
-          const isSelected = selectedDAGId === dag.dag_id;
+      {/* DAG list with loading overlay */}
+      <Box sx={{ position: 'relative' }}>
+        {isFetching && dags.length > 0 && (
+          <LoadingSpinner
+            overlay={true}
+            message="Refreshing..."
+            size="medium"
+          />
+        )}
+        
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+          {paginatedDAGs.map(dag => {
+            const statusDisplay = getStatusDisplay(dag);
+            const isSelected = selectedDAGId === dag.dag_id;
 
-          return (
-            <Card
-              key={dag.dag_id}
-              sx={{
-                cursor: onDAGSelect ? 'pointer' : 'default',
-                border: isSelected ? 2 : 1,
-                borderColor: isSelected ? 'primary.main' : 'divider',
-                opacity: isFetching ? 0.7 : 1,
-                transition: 'opacity 0.2s',
-                '&:hover': onDAGSelect
-                  ? {
-                      boxShadow: 2,
-                    }
-                  : {},
-              }}
-              onClick={() => onDAGSelect?.(dag.dag_id)}
-            >
+            return (
+              <Card
+                key={dag.dag_id}
+                sx={{
+                  cursor: onDAGSelect ? 'pointer' : 'default',
+                  border: isSelected ? 2 : 1,
+                  borderColor: isSelected ? 'primary.main' : 'divider',
+                  opacity: isFetching ? 0.7 : 1,
+                  transition: 'opacity 0.2s',
+                  '&:hover': onDAGSelect
+                    ? {
+                        boxShadow: 2,
+                      }
+                    : {},
+                }}
+                onClick={() => onDAGSelect?.(dag.dag_id)}
+              >
                 <CardContent>
                   <Box
                     sx={{ display: 'flex', alignItems: 'flex-start', gap: 2 }}
@@ -413,7 +438,7 @@ const DAGList: React.FC<DAGListProps> = ({ onDAGSelect, selectedDAGId }) => {
                             Schedule
                           </Typography>
                           <Typography variant="body2">
-                            {dag.schedule_interval?.value || 'None'}
+                            {dag.schedule_interval || 'None'}
                           </Typography>
                         </Box>
 
@@ -443,8 +468,8 @@ const DAGList: React.FC<DAGListProps> = ({ onDAGSelect, selectedDAGId }) => {
                         >
                           {dag.tags.map(tag => (
                             <Chip
-                              key={tag.name}
-                              label={tag.name}
+                              key={typeof tag === 'string' ? tag : tag.name}
+                              label={typeof tag === 'string' ? tag : tag.name}
                               size="small"
                               variant="outlined"
                               sx={{ fontSize: '0.75rem', height: 20 }}
@@ -495,7 +520,8 @@ const DAGList: React.FC<DAGListProps> = ({ onDAGSelect, selectedDAGId }) => {
                 </CardContent>
               </Card>
             );
-        })}
+          })}
+        </Box>
       </Box>
 
       {/* Pagination */}

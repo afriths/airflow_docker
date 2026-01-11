@@ -31,4 +31,21 @@ export { default as NotificationList } from './NotificationList';
 // Real-time Components
 export { default as RealTimeStatusIndicator } from './RealTimeStatusIndicator';
 
+// Error handling and feedback components
+export { default as ErrorBoundary } from './ErrorBoundary';
+export { default as ErrorDisplay } from './ErrorDisplay';
+export { default as LoadingSpinner } from './LoadingSpinner';
+export { default as OfflineIndicator, ConnectionStatusChip } from './OfflineIndicator';
+
+// Skeleton loading components
+export { 
+  default as SkeletonLoader,
+  DAGListSkeleton,
+  DAGRunHistorySkeleton,
+  TaskStatusSkeleton,
+  SidebarSkeleton,
+  DashboardStatsSkeleton,
+  CardSkeleton,
+} from './SkeletonLoader';
+
 // Component types are available through the component imports

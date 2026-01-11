@@ -41,3 +41,11 @@ export {
   useRealTimeStatus,
   type RealTimeConfig 
 } from './useRealTimeUpdates';
+
+// Offline support and error handling
+export { 
+  default as useOfflineSupport,
+  type OfflineSupportConfig,
+  type OfflineSupportReturn,
+  type CachedData
+} from './useOfflineSupport';
