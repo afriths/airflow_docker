@@ -18,6 +18,12 @@ export { default as DashboardSidebar } from './layout/DashboardSidebar';
 export { default as DAGList } from './DAGList';
 export { default as DAGTriggerDialog } from './DAGTriggerDialog';
 
+// Task Components
+export { default as TaskStatus } from './TaskStatus';
+export { default as TaskDetailModal } from './TaskDetailModal';
+export { default as TaskLogViewer } from './TaskLogViewer';
+export { default as TaskTimeline } from './TaskTimeline';
+
 // Notification Components
 export { default as NotificationList } from './NotificationList';
 

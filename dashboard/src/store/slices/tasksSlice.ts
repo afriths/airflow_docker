@@ -17,7 +17,11 @@ import {
 } from '../../services/apiTransformers';
 
 // Initial state
-const initialState: TasksState = {};
+const initialState: TasksState = {
+  taskLogs: {},
+  logsLoading: false,
+  logsError: null,
+};
 
 // Helper function to create task key
 const createTaskKey = (dagId: string, dagRunId: string) =>
@@ -85,30 +89,38 @@ export const fetchTaskLogs = createAsyncThunk(
   'tasks/fetchTaskLogs',
   async (
     {
-      dagId,
-      dagRunId,
-      taskId,
-      tryNumber,
+      dag_id,
+      dag_run_id,
+      task_id,
+      task_try_number,
+      full_content,
     }: {
-      dagId: string;
-      dagRunId: string;
-      taskId: string;
-      tryNumber?: number;
+      dag_id: string;
+      dag_run_id: string;
+      task_id: string;
+      task_try_number?: number;
+      full_content?: boolean;
     },
     { rejectWithValue }
   ) => {
     try {
       const response = await airflowApiClient.getTaskLogs({
-        dag_id: dagId,
-        dag_run_id: dagRunId,
-        task_id: taskId,
-        task_try_number: tryNumber || 1,
+        dag_id,
+        dag_run_id,
+        task_id,
+        task_try_number: task_try_number || 1,
+        full_content: full_content || true,
       });
+      
+      const logKey = `${dag_id}-${dag_run_id}-${task_id}-${task_try_number || 1}`;
+      
       return {
-        dagId,
-        dagRunId,
-        taskId,
+        logKey,
         logs: response.data.content,
+        dagId: dag_id,
+        dagRunId: dag_run_id,
+        taskId: task_id,
+        tryNumber: task_try_number || 1,
       };
     } catch (error: any) {
       return rejectWithValue(error.message || 'Failed to fetch task logs');
@@ -223,7 +235,11 @@ const tasksSlice = createSlice({
       delete state[taskKey];
     },
     // Reset all tasks
-    resetAllTasks: () => initialState,
+    resetAllTasks: () => ({
+      taskLogs: {},
+      logsLoading: false,
+      logsError: null,
+    }),
   },
   extraReducers: builder => {
     // Fetch task instances
@@ -373,6 +389,23 @@ const tasksSlice = createSlice({
         }
       }
     });
+
+    // Fetch task logs
+    builder
+      .addCase(fetchTaskLogs.pending, (state) => {
+        state.logsLoading = true;
+        state.logsError = null;
+      })
+      .addCase(fetchTaskLogs.fulfilled, (state, action) => {
+        const { logKey, logs } = action.payload;
+        state.logsLoading = false;
+        state.taskLogs[logKey] = logs;
+        state.logsError = null;
+      })
+      .addCase(fetchTaskLogs.rejected, (state, action) => {
+        state.logsLoading = false;
+        state.logsError = action.payload as string;
+      });
   },
 });
 

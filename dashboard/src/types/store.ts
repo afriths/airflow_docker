@@ -50,6 +50,11 @@ export interface TasksState {
     error: string | null;
     lastUpdated: number | null;
   };
+  taskLogs: {
+    [logKey: string]: string; // format: "dagId-runId-taskId-tryNumber"
+  };
+  logsLoading: boolean;
+  logsError: string | null;
 }
 
 // UI state for managing interface elements
