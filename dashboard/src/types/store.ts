@@ -59,6 +59,7 @@ export interface UIState {
   theme: 'light' | 'dark';
   refreshInterval: number; // in milliseconds
   autoRefresh: boolean;
+  selectedDAG: string | null;
 }
 
 // Root application state

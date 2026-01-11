@@ -18,6 +18,7 @@ const initialState: UIState = {
   theme: 'light',
   refreshInterval: 30000, // 30 seconds default
   autoRefresh: true,
+  selectedDAG: null,
 };
 
 // UI slice
@@ -79,6 +80,10 @@ const uiSlice = createSlice({
     setAutoRefresh: (state, action: PayloadAction<boolean>) => {
       state.autoRefresh = action.payload;
     },
+    // Set selected DAG
+    setSelectedDAG: (state, action: PayloadAction<string | null>) => {
+      state.selectedDAG = action.payload;
+    },
     // Reset UI state
     resetUI: () => initialState,
   },
@@ -96,6 +101,7 @@ export const {
   setRefreshInterval,
   toggleAutoRefresh,
   setAutoRefresh,
+  setSelectedDAG,
   resetUI,
 } = uiSlice.actions;
 
