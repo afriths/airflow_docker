@@ -20,9 +20,9 @@ import {
   Warning as WarningIcon,
   Info as InfoIcon,
 } from '@mui/icons-material';
-import { useAppDispatch, useAppSelector } from '../store';
-import { removeNotification } from '../store/slices/uiSlice';
-import type { Notification } from '../types/app';
+import { useAppDispatch, useAppSelector } from '../../store';
+import { removeNotification } from '../../store/slices/uiSlice';
+import type { Notification } from '../../types/app';
 
 // Slide transition component
 function SlideTransition(props: SlideProps) {

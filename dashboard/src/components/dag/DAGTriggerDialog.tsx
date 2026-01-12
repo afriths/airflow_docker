@@ -24,7 +24,7 @@ import {
   Cancel as CancelIcon,
   Warning as WarningIcon,
 } from '@mui/icons-material';
-import type { DAG } from '../types/app';
+import type { DAG } from '../../types/app';
 
 export interface DAGTriggerDialogProps {
   open: boolean;

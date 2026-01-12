@@ -4,19 +4,19 @@
  */
 
 import React, { useEffect, useCallback } from 'react';
-import { useAppDispatch, useAppSelector } from '../store';
+import { useAppDispatch, useAppSelector } from '../../store';
 import {
   setAuthToken,
   setUser,
   resetAuth,
   refreshToken,
-} from '../store/slices/authSlice';
+} from '../../store/slices/authSlice';
 import {
   selectIsAuthenticated,
   selectAuthToken,
   selectCurrentUser,
-} from '../store/selectors';
-import { authService } from '../services';
+} from '../../store/selectors';
+import { authService } from '../../services';
 
 interface AuthProviderProps {
   children: React.ReactNode;

@@ -163,37 +163,42 @@ export class AuthService {
     password: string
   ): Promise<{ token: AuthToken; user: User }> {
     try {
-      // Note: Airflow's default auth might not have a dedicated login endpoint
-      // This is a placeholder implementation that would need to be adapted
-      // based on the actual Airflow authentication setup
+      // Make a login request to Airflow's login endpoint
+      const loginResponse = await fetch(`${import.meta.env.VITE_AIRFLOW_API_URL}/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: new URLSearchParams({
+          username: username,
+          password: password,
+        }),
+        credentials: 'include', // Include cookies for session
+      });
 
-      // const loginData: LoginRequest = { username, password };
+      if (!loginResponse.ok) {
+        throw new Error('Login failed');
+      }
 
-      // For basic auth, we can create a token-like structure
-      // In a real implementation, this would call the appropriate Airflow auth endpoint
-      const basicAuthToken = btoa(`${username}:${password}`);
-
-      // Create a mock token structure for basic auth
+      // For session-based auth, we don't get a token but rely on cookies
+      // Create a dummy token to indicate successful authentication
       const token: AuthToken = {
-        access_token: basicAuthToken,
-        token_type: 'Basic',
+        access_token: 'session-based',
+        token_type: 'Session',
         expires_in: 24 * 60 * 60, // 24 hours
         expires_at: Date.now() + 24 * 60 * 60 * 1000,
       };
 
       // Create user object
       const user: User = {
-        username,
-        roles: ['User'], // Default role
+        username: username,
+        roles: ['Admin'],
       };
 
       // Set token and store auth data
       this.setToken(token);
       this.currentUser = user;
       this.storeAuth(token, user);
-
-      // Test the connection to validate credentials
-      await airflowApiClient.testConnection();
 
       return { token, user };
     } catch (error) {

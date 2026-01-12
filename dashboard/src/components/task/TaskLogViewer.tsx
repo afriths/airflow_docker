@@ -34,10 +34,10 @@ import {
   Warning as WarningIcon,
   Info as InfoIcon,
 } from '@mui/icons-material';
-import { useAppDispatch, useAppSelector } from '../store';
-import { fetchTaskLogs } from '../store/slices/tasksSlice';
-import { addNotification } from '../store/slices/uiSlice';
-import type { TaskLogViewerProps } from '../types/components';
+import { useAppDispatch, useAppSelector } from '../../store';
+import { fetchTaskLogs } from '../../store/slices/tasksSlice';
+import { addNotification } from '../../store/slices/uiSlice';
+import type { TaskLogViewerProps } from '../../types/components';
 
 const TaskLogViewer: React.FC<TaskLogViewerProps> = ({
   open,

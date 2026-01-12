@@ -36,7 +36,7 @@ import {
   Remove as RemovedIcon,
   Visibility as ViewLogsIcon,
 } from '@mui/icons-material';
-import type { TaskInstance } from '../types/app';
+import type { TaskInstance } from '../../types/app';
 
 interface TaskDetailModalProps {
   open: boolean;

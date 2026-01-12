@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { Grid, type GridProps, useTheme } from '@mui/material';
-import { useResponsive } from '../hooks';
+import { useResponsive } from '../../hooks';
 
 interface ResponsiveGridProps extends Omit<GridProps, 'container' | 'item'> {
   children: React.ReactNode;

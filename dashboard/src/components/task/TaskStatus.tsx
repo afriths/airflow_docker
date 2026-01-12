@@ -34,14 +34,14 @@ import {
   Info as InfoIcon,
   Timeline as TimelineIcon,
 } from '@mui/icons-material';
-import { useAppDispatch, useAppSelector } from '../store';
-import { fetchTaskInstances } from '../store/slices/tasksSlice';
-import { addNotification } from '../store/slices/uiSlice';
+import { useAppDispatch, useAppSelector } from '../../store';
+import { fetchTaskInstances } from '../../store/slices/tasksSlice';
+import { addNotification } from '../../store/slices/uiSlice';
 import TaskDetailModal from './TaskDetailModal';
 import TaskLogViewer from './TaskLogViewer';
 import TaskTimeline from './TaskTimeline';
-import type { TaskInstance } from '../types/app';
-import type { TaskStatusProps } from '../types/components';
+import type { TaskInstance } from '../../types/app';
+import type { TaskStatusProps } from '../../types/components';
 
 const TaskStatus: React.FC<TaskStatusProps> = ({
   dagId,

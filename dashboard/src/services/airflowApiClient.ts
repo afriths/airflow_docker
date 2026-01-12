@@ -83,7 +83,7 @@ export class AirflowAPIClient {
         ...this.config.headers,
         'Accept': 'application/json',
       },
-      withCredentials: false,
+      withCredentials: true, // Include cookies for session-based auth
     });
   }
 
@@ -94,8 +94,15 @@ export class AirflowAPIClient {
     // Request interceptor for adding auth token
     this.client.interceptors.request.use(
       config => {
-        if (this.authToken) {
-          config.headers.Authorization = `Bearer ${this.authToken}`;
+        // Skip authentication entirely for development
+        if (this.authToken && this.authToken !== 'no-auth-required') {
+          // For Basic Auth tokens, use them directly
+          if (this.authToken.startsWith('Basic ')) {
+            config.headers.Authorization = this.authToken;
+          } else {
+            // For Bearer tokens
+            config.headers.Authorization = `Bearer ${this.authToken}`;
+          }
         }
         return config;
       },
@@ -108,8 +115,8 @@ export class AirflowAPIClient {
       async (error: AxiosError) => {
         const apiError = this.transformError(error);
 
-        // Handle token expiration
-        if (error.response?.status === 401 && this.authToken) {
+        // Handle token expiration (but skip for no-auth mode)
+        if (error.response?.status === 401 && this.authToken && this.authToken !== 'no-auth-required') {
           this.authToken = null;
           // Emit event for token refresh (handled by auth service)
           window.dispatchEvent(new CustomEvent('auth:token-expired'));
@@ -502,7 +509,7 @@ export class AirflowAPIClient {
    */
   public async testConnection(): Promise<APIResponse<{ status: string }>> {
     return this.executeWithRetry(() =>
-      // Use the version endpoint to test connection
+      // Test with a simple API call that requires authentication
       this.client.get<{ status: string }>('/version')
     );
   }

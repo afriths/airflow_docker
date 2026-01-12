@@ -31,7 +31,7 @@ import {
   ArrowUpward as UpstreamFailedIcon,
   Remove as RemovedIcon,
 } from '@mui/icons-material';
-import type { TaskInstance } from '../types/app';
+import type { TaskInstance } from '../../types/app';
 
 interface TaskTimelineProps {
   open: boolean;

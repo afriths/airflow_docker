@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { Box, Link, styled } from '@mui/material';
-import { useAccessibility } from '../hooks';
+import { useAccessibility } from '../../hooks';
 
 const StyledSkipLink = styled(Link)(({ theme }) => ({
   position: 'absolute',

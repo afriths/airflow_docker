@@ -17,9 +17,9 @@ import {
   IconButton,
 } from '@mui/material';
 import { Visibility, VisibilityOff, Person, Lock } from '@mui/icons-material';
-import { useAppDispatch, useAppSelector } from '../store';
-import { loginUser, clearAuthError } from '../store/slices/authSlice';
-import { selectAuthLoading, selectAuthError } from '../store/selectors';
+import { useAppDispatch, useAppSelector } from '../../store';
+import { loginUser, clearAuthError } from '../../store/slices/authSlice';
+import { selectAuthLoading, selectAuthError } from '../../store/selectors';
 
 interface LoginFormProps {
   onLoginSuccess?: () => void;

@@ -27,8 +27,8 @@ import {
   Security as AuthIcon,
   Block as BlockIcon,
 } from '@mui/icons-material';
-import type { EnhancedError } from '../services/errorHandler';
-import { formatErrorForDisplay } from '../services/errorHandler';
+import type { EnhancedError } from '../../services/errorHandler';
+import { formatErrorForDisplay } from '../../services/errorHandler';
 
 export interface ErrorDisplayProps {
   error: EnhancedError | string | null;

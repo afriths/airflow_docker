@@ -27,7 +27,7 @@ import {
   PlayArrow as PlayIcon,
   Settings as SettingsIcon,
 } from '@mui/icons-material';
-import { useRealTimeUpdates, useRealTimeStatus } from '../hooks/useRealTimeUpdates';
+import { useRealTimeUpdates, useRealTimeStatus } from '../../hooks/useRealTimeUpdates';
 
 interface RealTimeStatusIndicatorProps {
   showRefreshButton?: boolean;

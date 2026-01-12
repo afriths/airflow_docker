@@ -271,21 +271,23 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ onClose }) => {
             }}
           />
           <Tooltip title="Refresh DAGs">
-            <IconButton
-              size="small"
-              onClick={e => {
-                e.stopPropagation();
-                handleRefreshDAGs();
-              }}
-              disabled={loading}
-              aria-label="Refresh DAG list"
-            >
-              {loading ? (
-                <CircularProgress size={16} />
-              ) : (
-                <RefreshIcon fontSize="small" />
-              )}
-            </IconButton>
+            <span>
+              <IconButton
+                size="small"
+                onClick={e => {
+                  e.stopPropagation();
+                  handleRefreshDAGs();
+                }}
+                disabled={loading}
+                aria-label="Refresh DAG list"
+              >
+                {loading ? (
+                  <CircularProgress size={16} />
+                ) : (
+                  <RefreshIcon fontSize="small" />
+                )}
+              </IconButton>
+            </span>
           </Tooltip>
           {dagsExpanded ? (
             <ExpandLess aria-hidden="true" />

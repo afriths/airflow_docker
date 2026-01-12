@@ -5,14 +5,14 @@
 
 import React, { useEffect, useState } from 'react';
 import { Box, CircularProgress, Typography } from '@mui/material';
-import { useAppSelector, useAppDispatch } from '../store';
+import { useAppSelector, useAppDispatch } from '../../store';
 import {
   selectIsAuthenticated,
   selectAuthLoading,
   selectAuthToken,
-} from '../store/selectors';
-import { refreshToken } from '../store/slices/authSlice';
-import { authService } from '../services';
+} from '../../store/selectors';
+import { refreshToken } from '../../store/slices/authSlice';
+import { authService } from '../../services';
 import LoginForm from './LoginForm';
 
 interface ProtectedRouteProps {

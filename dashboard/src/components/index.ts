@@ -1,60 +1,50 @@
 /**
  * Components Index
- * Central export point for all components
+ * Central export point for all components organized by category
  */
 
 // Authentication Components
-export { default as LoginForm } from './LoginForm';
-export { default as ProtectedRoute } from './ProtectedRoute';
-export { default as AuthProvider } from './AuthProvider';
-export { default as LogoutButton } from './LogoutButton';
+export * from './auth';
 
-// Layout Components
-export { default as DashboardLayout } from './layout/DashboardLayout';
-export { default as DashboardHeader } from './layout/DashboardHeader';
-export { default as DashboardSidebar } from './layout/DashboardSidebar';
-
-// DAG Components
-export { default as DAGList } from './DAGList';
-export { default as DAGTriggerDialog } from './DAGTriggerDialog';
-export { default as DAGRunHistory } from './DAGRunHistory';
+// DAG Components  
+export * from './dag';
 
 // Task Components
-export { default as TaskStatus } from './TaskStatus';
-export { default as TaskDetailModal } from './TaskDetailModal';
-export { default as TaskLogViewer } from './TaskLogViewer';
-export { default as TaskTimeline } from './TaskTimeline';
+export * from './task';
+
+// Error Components
+export * from './error';
 
 // Notification Components
-export { default as NotificationList } from './NotificationList';
+export * from './notification';
 
-// Real-time Components
-export { default as RealTimeStatusIndicator } from './RealTimeStatusIndicator';
+// Common/Shared Components
+export * from './common';
 
-// Error handling and feedback components
-export { default as ErrorBoundary } from './ErrorBoundary';
-export { default as ErrorDisplay } from './ErrorDisplay';
-export { default as LoadingSpinner } from './LoadingSpinner';
-export { default as OfflineIndicator, ConnectionStatusChip } from './OfflineIndicator';
+// Layout Components
+export * from './layout';
 
-// Skeleton loading components
+// Re-export specific components for backward compatibility
+export { AuthProvider, LoginForm, LogoutButton, ProtectedRoute } from './auth';
+export { DAGList, DAGRunHistory, DAGTriggerDialog } from './dag';
+export { TaskDetailModal, TaskLogViewer, TaskStatus, TaskTimeline } from './task';
+export { ErrorBoundary, ErrorDisplay } from './error';
+export { NotificationList } from './notification';
+export { LoadingSpinner, OfflineIndicator, RealTimeStatusIndicator, ResponsiveGrid, SkeletonLoader, SkipLink } from './common';
+export { DashboardHeader, DashboardLayout, DashboardSidebar } from './layout';
+
+// Export specific named exports from components that have them
+export { ConnectionStatusChip } from './common/OfflineIndicator';
 export { 
-  default as SkeletonLoader,
   DAGListSkeleton,
   DAGRunHistorySkeleton,
   TaskStatusSkeleton,
   SidebarSkeleton,
   DashboardStatsSkeleton,
   CardSkeleton,
-} from './SkeletonLoader';
-
-// Responsive and accessibility components
-export { default as SkipLink } from './SkipLink';
+} from './common/SkeletonLoader';
 export { 
-  default as ResponsiveGrid, 
   ResponsiveCardGrid, 
   ResponsiveListGrid, 
   ResponsiveTwoColumnGrid 
-} from './ResponsiveGrid';
-
-// Component types are available through the component imports
+} from './common/ResponsiveGrid';

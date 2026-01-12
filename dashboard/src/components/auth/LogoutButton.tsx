@@ -19,9 +19,9 @@ import {
   Tooltip,
 } from '@mui/material';
 import { Logout, Person, MoreVert } from '@mui/icons-material';
-import { useAppDispatch, useAppSelector } from '../store';
-import { logoutUser } from '../store/slices/authSlice';
-import { selectCurrentUser, selectAuthLoading } from '../store/selectors';
+import { useAppDispatch, useAppSelector } from '../../store';
+import { logoutUser } from '../../store/slices/authSlice';
+import { selectCurrentUser, selectAuthLoading } from '../../store/selectors';
 
 interface LogoutButtonProps {
   variant?: 'button' | 'icon' | 'menu';

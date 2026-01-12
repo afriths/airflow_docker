@@ -53,10 +53,11 @@ import {
   useDAGRunPollingStatus, 
   useRefreshDAGRuns,
   useTaskInstancesQuery 
-} from '../hooks';
-import { RealTimeStatusIndicator, TaskStatus } from './';
-import type { DAGRunFilters, DAGRun } from '../types/app';
-import type { DAGRunState, DAGRunType } from '../types/airflow';
+} from '../../hooks';
+import { RealTimeStatusIndicator } from '../common';
+import { TaskStatus } from '../task';
+import type { DAGRunFilters, DAGRun } from '../../types/app';
+import type { DAGRunState, DAGRunType } from '../../types/airflow';
 
 interface DAGRunHistoryProps {
   dagId: string;

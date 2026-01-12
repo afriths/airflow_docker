@@ -37,16 +37,16 @@ import {
   useTriggerDAGMutation, 
   useUpdateDAGMutation, 
   useRefreshDAGs 
-} from '../hooks';
+} from '../../hooks';
 import { 
   RealTimeStatusIndicator, 
-  ErrorDisplay, 
-  DAGListSkeleton,
   LoadingSpinner 
-} from './';
+} from '../common';
+import { ErrorDisplay } from '../error';
+import { DAGListSkeleton } from '../common/SkeletonLoader';
 import DAGTriggerDialog from './DAGTriggerDialog';
-import { enhanceError } from '../services/errorHandler';
-import type { DAG, DAGFilters } from '../types/app';
+import { enhanceError } from '../../services/errorHandler';
+import type { DAG, DAGFilters } from '../../types/app';
 
 interface DAGListProps {
   onDAGSelect?: (dagId: string) => void;
