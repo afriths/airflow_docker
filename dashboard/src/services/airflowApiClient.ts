@@ -77,9 +77,13 @@ export class AirflowAPIClient {
    */
   private createAxiosInstance(): AxiosInstance {
     return axios.create({
-      baseURL: `${this.config.baseURL}/api/v1`,
+      baseURL: `${this.config.baseURL}/api/v2`,
       timeout: this.config.timeout,
-      headers: this.config.headers,
+      headers: {
+        ...this.config.headers,
+        'Accept': 'application/json',
+      },
+      withCredentials: false,
     });
   }
 
@@ -498,7 +502,8 @@ export class AirflowAPIClient {
    */
   public async testConnection(): Promise<APIResponse<{ status: string }>> {
     return this.executeWithRetry(() =>
-      this.client.get<{ status: string }>('/health')
+      // Use the version endpoint to test connection
+      this.client.get<{ status: string }>('/version')
     );
   }
 

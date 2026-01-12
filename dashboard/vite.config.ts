@@ -13,7 +13,13 @@ export default defineConfig(({ command, mode }) => {
       port: 3000,
       proxy: {
         '/api': {
-          target: env.VITE_AIRFLOW_API_URL || 'http://localhost:8080',
+          target: env.VITE_AIRFLOW_API_URL || 'http://localhost:8081',
+          changeOrigin: true,
+          secure: false,
+          rewrite: (path) => path.replace(/^\/api/, '/api'),
+        },
+        '/health': {
+          target: env.VITE_AIRFLOW_API_URL || 'http://localhost:8081',
           changeOrigin: true,
           secure: false,
         },

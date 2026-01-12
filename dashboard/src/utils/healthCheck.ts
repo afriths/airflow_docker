@@ -32,7 +32,8 @@ class HealthChecker {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 5000);
 
-      const response = await fetch(`${config.AIRFLOW_API_URL}/api/v1/health`, {
+      // Use the correct Airflow health endpoint (not under /api/v1)
+      const response = await fetch(`${config.AIRFLOW_API_URL}/health`, {
         method: 'GET',
         signal: controller.signal,
         headers: {
